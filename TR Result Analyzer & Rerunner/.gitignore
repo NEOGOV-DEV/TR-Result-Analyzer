@@ -26,8 +26,9 @@ wheels/
 .installed.cfg
 *.egg
 
-# Reports directory
-reports/
+# Reports directory (but keep the folder structure)
+reports/*
+!reports/.gitkeep
 
 # IDEs
 .vscode/

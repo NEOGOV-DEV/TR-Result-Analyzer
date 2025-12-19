@@ -1,0 +1,92 @@
+{
+    "suites": {
+        "CoreHR-MasterSuite-STG": {
+            "auth_token": "33a92ef7-6686-4541-b499-818980fcc000",
+            "base_url": "https://api2.testrigor.com/api/v1/apps/duuLZcXDKFGEB48SM"
+        },
+        "HRIS-CoreHR-QA": {
+            "auth_token": "4b75fec4-a9df-4ed3-9dac-d7385d3d7da6",
+            "base_url": "https://api2.testrigor.com/api/v1/apps/isQF2sXjZPAzRFScT"
+        },
+        "HRIS-US-CoreHR": {
+            "auth_token": "cc0d9f49-8bd9-4c60-af05-efd463f3c969",
+            "base_url": "https://api2.testrigor.com/api/v1/apps/2763cy23XJ4fryTXw"
+        },
+        "HRIS-US-CoreHR-QA": {
+            "auth_token": "1384b04e-af9f-4585-9e7c-6a8417b8b773",
+            "base_url": "https://api2.testrigor.com/api/v1/apps/igQwfzurCigjkCqa4"
+        },
+        "HRIS-US-PAY-QA": {
+            "auth_token": "6fea9dd7-e77c-43eb-9d4b-dc0633d76ec9",
+            "base_url": "https://api2.testrigor.com/api/v1/apps/srBMYWiSTcPYyZmxa"
+        },
+        "HRIS-US-PAY": {
+            "auth_token": "b869139d-4174-449f-9a8c-471016ecf8ae",
+            "base_url": "https://api2.testrigor.com/api/v1/apps/XdBv6x6srdPCPtAyT"
+        },
+        "Payroll-QA": {
+            "auth_token": "1de7d7d4-78ac-43aa-95cb-c9784e5706f3",
+            "base_url": "https://api2.testrigor.com/api/v1/apps/cSYTT9XKrRKMg2G2G"
+        },
+        "Payroll-MasterSuite-STG": {
+            "auth_token": "40938f06-be2c-43f7-b7cf-3a293369d5c2",
+            "base_url": "https://api2.testrigor.com/api/v1/apps/e3vPALEP4hedL3MpR"
+        },
+        "HRIS-US-TA-QA": {
+            "auth_token": "d6ea3d3b-8d80-4680-b318-a1f4820919ec",
+            "base_url": "https://api2.testrigor.com/api/v1/apps/Fe2oCM4RjukW5yZDu"
+        },
+        "HRIS-US-TA": {
+            "auth_token": "c3d167e1-c649-45a5-8310-90d2811514fa",
+            "base_url": "https://api2.testrigor.com/api/v1/apps/otFdy9rcEsvhiKnjR"
+        },
+        "Time and Attendance-QA": {
+            "auth_token": "2f144c44-f1ce-49c8-8869-1380431edacd",
+            "base_url": "https://api2.testrigor.com/api/v1/apps/CAvAM64hEcSG2SgNd"
+        },
+        "Time and Attendance-MasterSuite-STG": {
+            "auth_token": "45ce37ea-63f4-45dd-b9ae-7dedda1d5278",
+            "base_url": "https://api2.testrigor.com/api/v1/apps/HPRXfAf6SdzjszhAD"
+        },
+        "Benefits-QA": {
+            "auth_token": "3a9bb060-1b1b-4049-88fb-0158d02e09d0",
+            "base_url": "https://api2.testrigor.com/api/v1/apps/fEtBhFLBNZRyahLtQ"
+        },
+        "Benefits-MasterSuite-STG": {
+            "auth_token": "8b0395ba-ed98-4346-86c5-5b50c94b174a",
+            "base_url": "https://api2.testrigor.com/api/v1/apps/AGoddc4YFX4XZ2yzX"
+        },
+        "HRIS-US-BEN": {
+            "auth_token": "31b2dbb2-9286-4855-a3ac-ca64ad97b339",
+            "base_url": "https://api2.testrigor.com/api/v1/apps/jFr7mnnNpqz3yaYaN"
+        },
+        "HRIS-US-BEN-QA": {
+            "auth_token": "95fe6b84-f19c-4bf2-8757-c706630e26de",
+            "base_url": "https://api2.testrigor.com/api/v1/apps/KaRDcrdDakF8hzwxS"
+        },
+        "HRIS-US-SCHD-QA": {
+            "auth_token": "7a32ef3c-2697-4916-b019-9afa5a677e36",
+            "base_url": "https://api2.testrigor.com/api/v1/apps/Lnyo2s7endSLmiewE"
+        },
+        "HRIS-US-SCHD": {
+            "auth_token": "5123ce8d-d993-431d-90e9-d18f8fe2280a",
+            "base_url": "https://api2.testrigor.com/api/v1/apps/QSnP87sG5WPGWZwkM"
+        },
+        "Schedule-QA": {
+            "auth_token": "43fd314e-5ba4-4256-b557-19a803749164",
+            "base_url": "https://api2.testrigor.com/api/v1/apps/XsSgSszmiRQZzsxxD"
+        },
+        "Schedule-MasterSuite-STG": {
+            "auth_token": "bc67d55f-455c-433a-ad34-7e41239101f5",
+            "base_url": "https://api2.testrigor.com/api/v1/apps/zSK7y99JWzZwjWjiu"
+        },
+        "Neogov Common-QA": {
+            "auth_token": "de597ca4-eb76-4474-8846-2dd4e934fdf9",
+            "base_url": "https://api2.testrigor.com/api/v1/apps/3mSASJxkrocrEfkT4"
+        },
+        "Neogov Common": {
+            "auth_token": "e7abbd46-8c07-4fff-80b0-d38499e94c69",
+            "base_url": "https://api2.testrigor.com/api/v1/apps/oLptoJk8KshiNrB74"
+        }
+    }
+}

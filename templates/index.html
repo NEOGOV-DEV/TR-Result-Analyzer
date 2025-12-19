@@ -1,0 +1,3288 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Rigor Analyzer Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f7fa;
+            min-height: 100vh;
+        }
+        
+        /* Navigation Bar */
+        .navbar {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 0;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+        }
+        
+        .navbar-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 20px;
+        }
+        
+        .navbar-brand {
+            font-size: 24px;
+            font-weight: bold;
+            padding: 20px 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .nav-menu {
+            display: flex;
+            list-style: none;
+            gap: 5px;
+        }
+        
+        .nav-item {
+            position: relative;
+        }
+        
+        .nav-link {
+            display: block;
+            padding: 20px 25px;
+            color: white;
+            text-decoration: none;
+            font-weight: 500;
+            transition: background 0.3s;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+        }
+        
+        .nav-link:hover {
+            background: rgba(255,255,255,0.1);
+        }
+        
+        .nav-link.active {
+            background: rgba(255,255,255,0.15);
+            border-bottom-color: white;
+        }
+        
+        /* Main Content */
+        .main-content {
+            margin-top: 80px;
+            padding: 30px 20px;
+            max-width: 1400px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        
+        .page {
+            display: none;
+            animation: fadeIn 0.3s;
+        }
+        
+        .page.active {
+            display: block;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        /* Page Headers */
+        .page-header {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            margin-bottom: 30px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        
+        .page-header h1 {
+            color: #333;
+            font-size: 32px;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .page-header p {
+            color: #666;
+            font-size: 16px;
+        }
+        
+        /* Card Styles */
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        
+        .card-header {
+            font-size: 20px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+        
+        /* Form Styles */
+        .form-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            color: #333;
+            font-weight: 600;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+        
+        small {
+            display: block;
+            margin-top: 5px;
+        }
+        
+        input[type="text"], input[type="checkbox"], select, textarea {
+            padding: 12px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+            font-family: inherit;
+        }
+        
+        input[type="text"], select, textarea {
+            width: 100%;
+        }
+        
+        input[type="checkbox"] {
+            width: auto;
+            margin-right: 8px;
+            cursor: pointer;
+        }
+        
+        input[type="text"]:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+        
+        select {
+            cursor: pointer;
+            background-color: white;
+        }
+        
+        /* Button Styles */
+        button, .btn {
+            padding: 12px 30px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            display: inline-block;
+            text-decoration: none;
+        }
+        
+        button:hover:not(:disabled), .btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+        }
+        
+        button:active:not(:disabled), .btn:active:not(:disabled) {
+            transform: translateY(0);
+        }
+        
+        button:disabled, .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .btn-secondary {
+            background: #6c757d;
+        }
+        
+        .btn-success {
+            background: #28a745;
+        }
+        
+        .btn-danger {
+            background: #dc3545;
+        }
+        
+        .btn-small {
+            padding: 6px 16px;
+            font-size: 13px;
+        }
+        
+        .btn-group {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        
+        .rerun-btn {
+            margin-top: 15px;
+            background: #007bff;
+            padding: 12px 24px;
+            border-radius: 6px;
+            color: white;
+            border: none;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.3s, transform 0.2s;
+        }
+        
+        .rerun-btn:hover {
+            background: #0056b3;
+            transform: translateY(-1px);
+        }
+        
+        .rerun-btn:disabled {
+            background: #6c757d;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        /* Loader Styles */
+        .loader {
+            display: none;
+            text-align: center;
+            padding: 40px;
+        }
+        
+        .loader.active {
+            display: block;
+        }
+        
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 15px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        /* Message/Alert Styles */
+        .message {
+            padding: 15px 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: none;
+        }
+        
+        .message.active {
+            display: block;
+        }
+        
+        .message.success {
+            background: #d4edda;
+            color: #155724;
+            border-left: 4px solid #28a745;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        
+        .message.error {
+            background: #f8d7da;
+            color: #721c24;
+            border-left: 4px solid #dc3545;
+        }
+        
+        .message.info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border-left: 4px solid #17a2b8;
+        }
+        
+        /* Compare tab message alignment fix */
+        #compareMessage.success,
+        #compareMessage.error,
+        #compareMessage.info {
+            margin-left: 0;
+            margin-right: 0;
+            max-width: 100%;
+        }
+        
+        /* Stats Display */
+        .stats {
+            display: flex;
+            justify-content: center;
+            gap: 60px;
+            margin: 15px 0;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+        
+        .stat-card {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        
+        .stat-item {
+            text-align: center;
+        }
+        
+        .stat-value {
+            font-size: 32px;
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 8px;
+        }
+        
+        .stat-label {
+            font-size: 14px;
+            color: #666;
+        }
+        
+        /* Download Link */
+        .download-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 20px;
+            background: #28a745;
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: background 0.3s;
+        }
+        
+        .download-link:hover {
+            background: #218838;
+        }
+        
+        .button-group {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: 15px;
+        }
+        
+        .view-report-btn {
+            padding: 10px 20px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 14px;
+        }
+        
+        .view-report-btn:hover {
+            background: #5568d3;
+        }
+        
+        /* Table Styles */
+        .table-container {
+            overflow-x: auto;
+            margin-top: 20px;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+        }
+        
+        thead {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        th, td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        
+        th {
+            font-weight: 600;
+            font-size: 14px;
+        }
+        
+        td {
+            font-size: 13px;
+            color: #555;
+        }
+        
+        tbody tr:hover {
+            background: #f8f9fa;
+        }
+        
+        .status-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        
+        .status-failed {
+            background: #ffebee;
+            color: #c62828;
+        }
+        
+        .status-passed {
+            background: #e8f5e9;
+            color: #2e7d32;
+        }
+        
+        .status-error {
+            background: #fff3e0;
+            color: #e65100;
+        }
+        
+        .status-rerun {
+            background: #fce4ec;
+            color: #880e4f;
+        }
+        
+        .status-n\/a {
+            background: #f5f5f5;
+            color: #757575;
+        }
+        
+        /* Comparison Grid */
+        .comparison-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            margin-top: 20px;
+        }
+        
+        /* Compact horizontal scroll layout for 4+ runs */
+        .comparison-grid.compact {
+            display: flex;
+            gap: 15px;
+            overflow-x: auto;
+            padding-bottom: 10px;
+            scroll-behavior: smooth;
+        }
+        
+        .comparison-grid.compact::-webkit-scrollbar {
+            height: 8px;
+        }
+        
+        .comparison-grid.compact::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 4px;
+        }
+        
+        .comparison-grid.compact::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 4px;
+        }
+        
+        .comparison-grid.compact::-webkit-scrollbar-thumb:hover {
+            background: #555;
+        }
+        
+        .comparison-card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        
+        .comparison-grid.compact .comparison-card {
+            padding: 15px;
+            min-width: 220px;
+            flex-shrink: 0;
+        }
+        
+        .comparison-card h3 {
+            color: #667eea;
+            margin-bottom: 15px;
+            font-size: 18px;
+        }
+        
+        .comparison-grid.compact .comparison-card h3 {
+            font-size: 15px;
+            margin-bottom: 10px;
+        }
+        
+        .comparison-grid.compact .stat-label {
+            font-size: 11px;
+        }
+        
+        .comparison-grid.compact .stat-value {
+            font-size: 16px !important;
+        }
+        
+        .comparison-grid.compact .comparison-card label {
+            font-size: 11px;
+        }
+        
+        .comparison-grid.compact .comparison-card input {
+            padding: 6px;
+            font-size: 12px;
+        }
+        
+        /* Scroll hint indicator */
+        .scroll-hint {
+            text-align: center;
+            color: #666;
+            font-size: 13px;
+            margin-top: 5px;
+            font-style: italic;
+        }
+        
+        /* Filter Panel */
+        .filter-panel {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        
+        .filter-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 15px;
+            color: #333;
+        }
+        
+        /* Checkbox Group */
+        .checkbox-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+        
+        .checkbox-item {
+            display: flex;
+            align-items: center;
+        }
+        
+        .checkbox-item label {
+            margin-bottom: 0;
+            font-weight: 500;
+            cursor: pointer;
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .comparison-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .nav-menu {
+                flex-direction: column;
+                gap: 0;
+            }
+            
+            .navbar-container {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation Bar -->
+    <nav class="navbar">
+        <div class="navbar-container">
+            <div class="navbar-brand">
+                🔍 Test Rigor Analyzer
+            </div>
+            <ul class="nav-menu">
+                <li class="nav-item">
+                    <a class="nav-link active" data-page="errorReport">Generate Failure Report & Rerun</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" data-page="compareReports">Compare TR Runs & Calculate RTR</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" data-page="cumulativeRtr">Cumulative RTR Calculator</a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <!-- Page 1: Generate Failure Report -->
+        <div id="errorReport" class="page active">
+            <div class="page-header" style="padding: 15px 20px; margin-bottom: 15px;">
+                <h1 style="font-size: 24px; margin-bottom: 5px;">📊 Generate Failure Report</h1>
+                <p style="font-size: 14px;">Generate and analyze failure reports from Test Rigor test runs</p>
+            </div>
+            
+            <div class="card">
+                <div class="card-header">Generate Report</div>
+                <form id="reportForm">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="suite">Select Suite</label>
+                            <select id="suite" name="suite" required>
+                                <option value="">-- Select a Suite --</option>
+                    <option value="CoreHR-MasterSuite-STG">CoreHR-MasterSuite-STG</option>
+                    <option value="HRIS-CoreHR-QA">HRIS-CoreHR-QA</option>
+                    <option value="HRIS-US-CoreHR">HRIS-US-CoreHR</option>
+                    <option value="HRIS-US-CoreHR-QA">HRIS-US-CoreHR-QA</option>
+                    <option value="HRIS-US-PAY-QA">HRIS-US-PAY-QA</option>
+                    <option value="HRIS-US-PAY">HRIS-US-PAY</option>
+                    <option value="Payroll-QA">Payroll-QA</option>
+                    <option value="Payroll-MasterSuite-STG">Payroll-MasterSuite-STG</option>
+                    <option value="HRIS-US-TA-QA">HRIS-US-TA-QA</option>
+                    <option value="HRIS-US-TA">HRIS-US-TA</option>
+                    <option value="Time and Attendance-QA">Time and Attendance-QA</option>
+                    <option value="Time and Attendance-MasterSuite-STG">Time and Attendance-MasterSuite-STG</option>
+                    <option value="Benefits-QA">Benefits-QA</option>
+                    <option value="Benefits-MasterSuite-STG">Benefits-MasterSuite-STG</option>
+                    <option value="HRIS-US-BEN">HRIS-US-BEN</option>
+                    <option value="HRIS-US-BEN-QA">HRIS-US-BEN-QA</option>
+                    <option value="HRIS-US-SCHD-QA">HRIS-US-SCHD-QA</option>
+                    <option value="HRIS-US-SCHD">HRIS-US-SCHD</option>
+                    <option value="Schedule-QA">Schedule-QA</option>
+                    <option value="Schedule-MasterSuite-STG">Schedule-MasterSuite-STG</option>
+                    <option value="Neogov Common-QA">Neogov Common-QA</option>
+                    <option value="Neogov Common">Neogov Common</option>
+                                </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="runId">Enter Run ID</label>
+                            <input 
+                                type="text" 
+                                id="runId" 
+                                name="runId" 
+                                placeholder="e.g., QGcBjYgYjjjHVkWqm" 
+                                required
+                            >
+                        </div>
+                    </div>
+                    
+                    <button type="submit" id="submitBtn" disabled>
+                        Generate Report
+                    </button>
+                </form>
+                
+                <div class="loader" id="loader">
+                    <div class="spinner"></div>
+                    <p>Generating report... Please wait</p>
+                </div>
+                
+                <div class="message" id="message"></div>
+                
+                <!-- Report Display Container -->
+                <div id="reportDisplay" style="display: none; margin-top: 20px;"></div>
+            </div>
+        </div>
+
+
+            
+
+        <!-- Page 2: Compare TR Runs & Calculate RTR -->
+        <div id="compareReports" class="page">
+            <div class="page-header" style="padding: 15px 20px; margin-bottom: 15px;">
+                <h1 style="font-size: 24px; margin-bottom: 8px;">⚖️ Compare TR Runs & Calculate RTR</h1>
+                <ul style="font-size: 13px; margin: 0; padding-left: 20px; line-height: 1.6;">
+                    <li>Calculate RTR for one run</li>
+                    <li>Compare Up to 7 Runs and Calculate RTR</li>
+                    <li>Merge Run Results of 2 Runs and Calculate RTR. 1st run is the base, 2nd run results will be merged into it.</li>
+                </ul>
+            </div>
+            
+            <div class="card" style="padding: 20px;">
+                <div class="card-header" style="margin-bottom: 15px; padding-bottom: 10px;">Enter Run IDs to Compare</div>
+                <form id="compareForm">
+                    <div class="form-group" style="margin-bottom: 15px;">
+                        <label for="compareSuite">Select Suite</label>
+                        <select id="compareSuite" required>
+                            <option value="">-- Select a Suite --</option>
+                            <option value="CoreHR-MasterSuite-STG">CoreHR-MasterSuite-STG</option>
+                            <option value="HRIS-CoreHR-QA">HRIS-CoreHR-QA</option>
+                            <option value="HRIS-US-CoreHR">HRIS-US-CoreHR</option>
+                            <option value="HRIS-US-CoreHR-QA">HRIS-US-CoreHR-QA</option>
+                            <option value="HRIS-US-PAY-QA">HRIS-US-PAY-QA</option>
+                            <option value="HRIS-US-PAY">HRIS-US-PAY</option>
+                            <option value="Payroll-QA">Payroll-QA</option>
+                            <option value="Payroll-MasterSuite-STG">Payroll-MasterSuite-STG</option>
+                            <option value="HRIS-US-TA-QA">HRIS-US-TA-QA</option>
+                            <option value="HRIS-US-TA">HRIS-US-TA</option>
+                            <option value="Time and Attendance-QA">Time and Attendance-QA</option>
+                            <option value="Time and Attendance-MasterSuite-STG">Time and Attendance-MasterSuite-STG</option>
+                            <option value="Benefits-QA">Benefits-QA</option>
+                            <option value="Benefits-MasterSuite-STG">Benefits-MasterSuite-STG</option>
+                            <option value="HRIS-US-BEN">HRIS-US-BEN</option>
+                            <option value="HRIS-US-BEN-QA">HRIS-US-BEN-QA</option>
+                            <option value="HRIS-US-SCHD-QA">HRIS-US-SCHD-QA</option>
+                            <option value="HRIS-US-SCHD">HRIS-US-SCHD</option>
+                            <option value="Schedule-QA">Schedule-QA</option>
+                            <option value="Schedule-MasterSuite-STG">Schedule-MasterSuite-STG</option>
+                            <option value="Neogov Common-QA">Neogov Common-QA</option>
+                            <option value="Neogov Common">Neogov Common</option>
+                        </select>
+                    </div>
+                    <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 15px;">
+                        <div>
+                            <label for="runId1" style="font-size: 13px;">Run ID 1</label>
+                            <input type="text" id="runId1" placeholder="First Run ID" required style="padding: 8px 10px;">
+                        </div>
+                        <div>
+                            <label for="runId2" style="font-size: 13px;">Run ID 2 <span style="font-size: 11px; color: #999;">(Optional)</span></label>
+                            <input type="text" id="runId2" placeholder="Second Run ID" style="padding: 8px 10px;">
+                        </div>
+                        <div>
+                            <label for="runId3" style="font-size: 13px;">Run ID 3 <span style="font-size: 11px; color: #999;">(Optional)</span></label>
+                            <input type="text" id="runId3" placeholder="Third Run ID" style="padding: 8px 10px;">
+                        </div>
+                        <div>
+                            <label for="runId4" style="font-size: 13px;">Run ID 4 <span style="font-size: 11px; color: #999;">(Optional)</span></label>
+                            <input type="text" id="runId4" placeholder="Fourth Run ID" style="padding: 8px 10px;">
+                        </div>
+                        <div>
+                            <label for="runId5" style="font-size: 13px;">Run ID 5 <span style="font-size: 11px; color: #999;">(Optional)</span></label>
+                            <input type="text" id="runId5" placeholder="Fifth Run ID" style="padding: 8px 10px;">
+                        </div>
+                        <div>
+                            <label for="runId6" style="font-size: 13px;">Run ID 6 <span style="font-size: 11px; color: #999;">(Optional)</span></label>
+                            <input type="text" id="runId6" placeholder="Sixth Run ID" style="padding: 8px 10px;">
+                        </div>
+                        <div>
+                            <label for="runId7" style="font-size: 13px;">Run ID 7 <span style="font-size: 11px; color: #999;">(Optional)</span></label>
+                            <input type="text" id="runId7" placeholder="Seventh Run ID" style="padding: 8px 10px;">
+                        </div>
+                    </div>
+                    <div style="display: flex; gap: 10px; justify-content: flex-start; flex-wrap: wrap;">
+                        <button type="button" id="calculateRtrBtn" onclick="calculateRtr()" disabled style="padding: 10px 20px;">Calculate RTR</button>
+                        <button type="button" id="compareRunsBtn" onclick="compareRuns()" disabled style="padding: 10px 20px;">Compare Runs and Calculate RTR</button>
+                        <button type="button" id="mergeRunsBtn" onclick="mergeRunResults()" disabled style="padding: 10px 20px; background: #17a2b8; color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer;">Merge Run Results and Calculate RTR</button>
+                    </div>
+                </form>
+                
+                <div class="loader" id="compareLoader">
+                    <div class="spinner"></div>
+                    <p>Comparing runs and calculating RTR... Please wait</p>
+                </div>
+                
+                <div class="message" id="compareMessage"></div>
+            </div>
+            
+            <!-- Comparison Results -->
+            <div id="comparisonResults" style="display: none;">
+                <!-- Summary Stats -->
+                <div class="card">
+                    <div class="card-header">Overall Summary</div>
+                    <div class="comparison-grid">
+                        <div class="comparison-card">
+                            <h3 id="run1Name">Run 1</h3>
+                            <div style="font-size: 12px; color: #666; margin-bottom: 15px;" id="run1Date"></div>
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px;">
+                                <div>
+                                    <div class="stat-label" style="margin-bottom: 5px;">Total</div>
+                                    <div class="stat-value" id="run1Total" style="font-size: 20px;">0</div>
+                                </div>
+                                <div>
+                                    <div class="stat-label" style="margin-bottom: 5px;">Passed</div>
+                                    <div class="stat-value" id="run1Passed" style="color: #28a745; font-size: 20px;">0</div>
+                                </div>
+                                <div>
+                                    <div class="stat-label" style="margin-bottom: 5px;">Failed</div>
+                                    <div class="stat-value" id="run1Failed" style="color: #dc3545; font-size: 20px;">0</div>
+                                </div>
+                                <div>
+                                    <div class="stat-label" style="margin-bottom: 5px;">Valid Fail</div>
+                                    <div class="stat-value" id="run1ValidFailCount" style="color: #ffc107; font-size: 20px;">0</div>
+                                </div>
+                            </div>
+                            <div style="border-top: 1px solid #e0e0e0; padding-top: 10px; margin-bottom: 10px;">
+                                <div class="stat-label" style="margin-bottom: 5px;">RTR</div>
+                                <div class="stat-value" id="run1Rtr" style="color: #28a745; font-size: 24px;">0%</div>
+                            </div>
+                            <div style="margin-top: 10px;">
+                                <label for="run1ValidFail" style="font-size: 12px; font-weight: 600; color: #666; display: block; margin-bottom: 5px;">Valid Fail (Optional)</label>
+                                <input type="number" id="run1ValidFail" placeholder="0" min="0" style="width: 100%; padding: 8px; border: 1px solid #e0e0e0; border-radius: 6px; font-size: 14px;" oninput="updateRecalculateButton()">
+                            </div>
+                        </div>
+                        <div class="comparison-card" style="display: none;">
+                            <h3 id="run2Name">Run 2</h3>
+                            <div style="font-size: 12px; color: #666; margin-bottom: 15px;" id="run2Date"></div>
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px;">
+                                <div>
+                                    <div class="stat-label" style="margin-bottom: 5px;">Total</div>
+                                    <div class="stat-value" id="run2Total" style="font-size: 20px;">0</div>
+                                </div>
+                                <div>
+                                    <div class="stat-label" style="margin-bottom: 5px;">Passed</div>
+                                    <div class="stat-value" id="run2Passed" style="color: #28a745; font-size: 20px;">0</div>
+                                </div>
+                                <div>
+                                    <div class="stat-label" style="margin-bottom: 5px;">Failed</div>
+                                    <div class="stat-value" id="run2Failed" style="color: #dc3545; font-size: 20px;">0</div>
+                                </div>
+                                <div>
+                                    <div class="stat-label" style="margin-bottom: 5px;">Valid Fail</div>
+                                    <div class="stat-value" id="run2ValidFailCount" style="color: #ffc107; font-size: 20px;">0</div>
+                                </div>
+                            </div>
+                            <div style="border-top: 1px solid #e0e0e0; padding-top: 10px; margin-bottom: 10px;">
+                                <div class="stat-label" style="margin-bottom: 5px;">RTR</div>
+                                <div class="stat-value" id="run2Rtr" style="color: #28a745; font-size: 24px;">0%</div>
+                            </div>
+                            <div style="margin-top: 10px;">
+                                <label for="run2ValidFail" style="font-size: 12px; font-weight: 600; color: #666; display: block; margin-bottom: 5px;">Valid Fail (Optional)</label>
+                                <input type="number" id="run2ValidFail" placeholder="0" min="0" style="width: 100%; padding: 8px; border: 1px solid #e0e0e0; border-radius: 6px; font-size: 14px;" oninput="updateRecalculateButton()">
+                            </div>
+                        </div>
+                        <div class="comparison-card" style="display: none;">
+                            <h3 id="run3Name">Run 3</h3>
+                            <div style="font-size: 12px; color: #666; margin-bottom: 15px;" id="run3Date"></div>
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px;">
+                                <div>
+                                    <div class="stat-label" style="margin-bottom: 5px;">Total</div>
+                                    <div class="stat-value" id="run3Total" style="font-size: 20px;">0</div>
+                                </div>
+                                <div>
+                                    <div class="stat-label" style="margin-bottom: 5px;">Passed</div>
+                                    <div class="stat-value" id="run3Passed" style="color: #28a745; font-size: 20px;">0</div>
+                                </div>
+                                <div>
+                                    <div class="stat-label" style="margin-bottom: 5px;">Failed</div>
+                                    <div class="stat-value" id="run3Failed" style="color: #dc3545; font-size: 20px;">0</div>
+                                </div>
+                                <div>
+                                    <div class="stat-label" style="margin-bottom: 5px;">Valid Fail</div>
+                                    <div class="stat-value" id="run3ValidFailCount" style="color: #ffc107; font-size: 20px;">0</div>
+                                </div>
+                            </div>
+                            <div style="border-top: 1px solid #e0e0e0; padding-top: 10px; margin-bottom: 10px;">
+                                <div class="stat-label" style="margin-bottom: 5px;">RTR</div>
+                                <div class="stat-value" id="run3Rtr" style="color: #28a745; font-size: 24px;">0%</div>
+                            </div>
+                            <div style="margin-top: 10px;">
+                                <label for="run3ValidFail" style="font-size: 12px; font-weight: 600; color: #666; display: block; margin-bottom: 5px;">Valid Fail (Optional)</label>
+                                <input type="number" id="run3ValidFail" placeholder="0" min="0" style="width: 100%; padding: 8px; border: 1px solid #e0e0e0; border-radius: 6px; font-size: 14px;" oninput="updateRecalculateButton()">
+                            </div>
+                        </div>
+                        <div class="comparison-card" style="display: none;">
+                            <h3 id="run4Name">Run 4</h3>
+                            <div style="font-size: 12px; color: #666; margin-bottom: 15px;" id="run4Date"></div>
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px;">
+                                <div>
+                                    <div class="stat-label" style="margin-bottom: 5px;">Total</div>
+                                    <div class="stat-value" id="run4Total" style="font-size: 20px;">0</div>
+                                </div>
+                                <div>
+                                    <div class="stat-label" style="margin-bottom: 5px;">Passed</div>
+                                    <div class="stat-value" id="run4Passed" style="color: #28a745; font-size: 20px;">0</div>
+                                </div>
+                                <div>
+                                    <div class="stat-label" style="margin-bottom: 5px;">Failed</div>
+                                    <div class="stat-value" id="run4Failed" style="color: #dc3545; font-size: 20px;">0</div>
+                                </div>
+                                <div>
+                                    <div class="stat-label" style="margin-bottom: 5px;">Valid Fail</div>
+                                    <div class="stat-value" id="run4ValidFailCount" style="color: #ffc107; font-size: 20px;">0</div>
+                                </div>
+                            </div>
+                            <div style="border-top: 1px solid #e0e0e0; padding-top: 10px; margin-bottom: 10px;">
+                                <div class="stat-label" style="margin-bottom: 5px;">RTR</div>
+                                <div class="stat-value" id="run4Rtr" style="color: #28a745; font-size: 24px;">0%</div>
+                            </div>
+                            <div style="margin-top: 10px;">
+                                <label for="run4ValidFail" style="font-size: 12px; font-weight: 600; color: #666; display: block; margin-bottom: 5px;">Valid Fail (Optional)</label>
+                                <input type="number" id="run4ValidFail" placeholder="0" min="0" style="width: 100%; padding: 8px; border: 1px solid #e0e0e0; border-radius: 6px; font-size: 14px;" oninput="updateRecalculateButton()">
+                            </div>
+                        </div>
+                        <div class="comparison-card" style="display: none;">
+                            <h3 id="run5Name">Run 5</h3>
+                            <div style="font-size: 12px; color: #666; margin-bottom: 15px;" id="run5Date"></div>
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px;">
+                                <div>
+                                    <div class="stat-label" style="margin-bottom: 5px;">Total</div>
+                                    <div class="stat-value" id="run5Total" style="font-size: 20px;">0</div>
+                                </div>
+                                <div>
+                                    <div class="stat-label" style="margin-bottom: 5px;">Passed</div>
+                                    <div class="stat-value" id="run5Passed" style="color: #28a745; font-size: 20px;">0</div>
+                                </div>
+                                <div>
+                                    <div class="stat-label" style="margin-bottom: 5px;">Failed</div>
+                                    <div class="stat-value" id="run5Failed" style="color: #dc3545; font-size: 20px;">0</div>
+                                </div>
+                                <div>
+                                    <div class="stat-label" style="margin-bottom: 5px;">Valid Fail</div>
+                                    <div class="stat-value" id="run5ValidFailCount" style="color: #ffc107; font-size: 20px;">0</div>
+                                </div>
+                            </div>
+                            <div style="border-top: 1px solid #e0e0e0; padding-top: 10px; margin-bottom: 10px;">
+                                <div class="stat-label" style="margin-bottom: 5px;">RTR</div>
+                                <div class="stat-value" id="run5Rtr" style="color: #28a745; font-size: 24px;">0%</div>
+                            </div>
+                            <div style="margin-top: 10px;">
+                                <label for="run5ValidFail" style="font-size: 12px; font-weight: 600; color: #666; display: block; margin-bottom: 5px;">Valid Fail (Optional)</label>
+                                <input type="number" id="run5ValidFail" placeholder="0" min="0" style="width: 100%; padding: 8px; border: 1px solid #e0e0e0; border-radius: 6px; font-size: 14px;" oninput="updateRecalculateButton()">
+                            </div>
+                        </div>
+                        <div class="comparison-card" style="display: none;">
+                            <h3 id="run6Name">Run 6</h3>
+                            <div style="font-size: 12px; color: #666; margin-bottom: 15px;" id="run6Date"></div>
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px;">
+                                <div>
+                                    <div class="stat-label" style="margin-bottom: 5px;">Total</div>
+                                    <div class="stat-value" id="run6Total" style="font-size: 20px;">0</div>
+                                </div>
+                                <div>
+                                    <div class="stat-label" style="margin-bottom: 5px;">Passed</div>
+                                    <div class="stat-value" id="run6Passed" style="color: #28a745; font-size: 20px;">0</div>
+                                </div>
+                                <div>
+                                    <div class="stat-label" style="margin-bottom: 5px;">Failed</div>
+                                    <div class="stat-value" id="run6Failed" style="color: #dc3545; font-size: 20px;">0</div>
+                                </div>
+                                <div>
+                                    <div class="stat-label" style="margin-bottom: 5px;">Valid Fail</div>
+                                    <div class="stat-value" id="run6ValidFailCount" style="color: #ffc107; font-size: 20px;">0</div>
+                                </div>
+                            </div>
+                            <div style="border-top: 1px solid #e0e0e0; padding-top: 10px; margin-bottom: 10px;">
+                                <div class="stat-label" style="margin-bottom: 5px;">RTR</div>
+                                <div class="stat-value" id="run6Rtr" style="color: #28a745; font-size: 24px;">0%</div>
+                            </div>
+                            <div style="margin-top: 10px;">
+                                <label for="run6ValidFail" style="font-size: 12px; font-weight: 600; color: #666; display: block; margin-bottom: 5px;">Valid Fail (Optional)</label>
+                                <input type="number" id="run6ValidFail" placeholder="0" min="0" style="width: 100%; padding: 8px; border: 1px solid #e0e0e0; border-radius: 6px; font-size: 14px;" oninput="updateRecalculateButton()">
+                            </div>
+                        </div>
+                        <div class="comparison-card" style="display: none;">
+                            <h3 id="run7Name">Run 7</h3>
+                            <div style="font-size: 12px; color: #666; margin-bottom: 15px;" id="run7Date"></div>
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px;">
+                                <div>
+                                    <div class="stat-label" style="margin-bottom: 5px;">Total</div>
+                                    <div class="stat-value" id="run7Total" style="font-size: 20px;">0</div>
+                                </div>
+                                <div>
+                                    <div class="stat-label" style="margin-bottom: 5px;">Passed</div>
+                                    <div class="stat-value" id="run7Passed" style="color: #28a745; font-size: 20px;">0</div>
+                                </div>
+                                <div>
+                                    <div class="stat-label" style="margin-bottom: 5px;">Failed</div>
+                                    <div class="stat-value" id="run7Failed" style="color: #dc3545; font-size: 20px;">0</div>
+                                </div>
+                                <div>
+                                    <div class="stat-label" style="margin-bottom: 5px;">Valid Fail</div>
+                                    <div class="stat-value" id="run7ValidFailCount" style="color: #ffc107; font-size: 20px;">0</div>
+                                </div>
+                            </div>
+                            <div style="border-top: 1px solid #e0e0e0; padding-top: 10px; margin-bottom: 10px;">
+                                <div class="stat-label" style="margin-bottom: 5px;">RTR</div>
+                                <div class="stat-value" id="run7Rtr" style="color: #28a745; font-size: 24px;">0%</div>
+                            </div>
+                            <div style="margin-top: 10px;">
+                                <label for="run7ValidFail" style="font-size: 12px; font-weight: 600; color: #666; display: block; margin-bottom: 5px;">Valid Fail (Optional)</label>
+                                <input type="number" id="run7ValidFail" placeholder="0" min="0" style="width: 100%; padding: 8px; border: 1px solid #e0e0e0; border-radius: 6px; font-size: 14px;" oninput="updateRecalculateButton()">
+                            </div>
+                        </div>
+                    </div>
+                    <div id="scrollHint" class="scroll-hint" style="display: none;">← Scroll horizontally to view all runs →</div>
+                    <div style="text-align: center; margin-top: 15px;">
+                        <button type="button" id="recalculateRtrBtn" onclick="recalculateRtr()" disabled style="padding: 10px 24px; background: #667eea; color: white; border: none; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; opacity: 0.5;">
+                            🔄 Recalculate RTR
+                        </button>
+                    </div>
+                    
+                    <!-- Valid Fail Test Case IDs Section -->
+                    <div style="margin-top: 20px; padding: 15px; background: #f8f9fa; border-radius: 8px; border: 1px solid #e0e0e0;">
+                        <label for="validFailTestCaseIds" style="font-size: 13px; font-weight: 600; color: #666; display: block; margin-bottom: 8px;">Enter Valid Fail Test Case IDs</label>
+                        <div style="display: flex; gap: 10px; align-items: flex-start; flex-wrap: wrap;">
+                            <input type="text" id="validFailTestCaseIds" placeholder="Enter test case IDs separated by commas (e.g., 123, 456, 789)" style="flex: 1; min-width: 250px; padding: 10px; border: 1px solid #d0d0d0; border-radius: 6px; font-size: 13px;" oninput="toggleValidFailButton()">
+                            <button type="button" id="updateValidFailBtn" onclick="updateValidFailStatus()" disabled style="padding: 10px 20px; background: #28a745; color: white; border: none; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer; white-space: nowrap; opacity: 0.5;">
+                                Update Valid Fail in Detailed Summary
+                            </button>
+                            <button type="button" onclick="resetValidFailStatus()" style="padding: 10px 20px; background: #dc3545; color: white; border: none; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer; white-space: nowrap;">
+                                Reset Valid Fail Status for Test Cases
+                            </button>
+                        </div>
+                        <div id="validFailMessage" style="margin-top: 8px; font-size: 12px;"></div>
+                    </div>
+                </div>
+                
+                <!-- Detailed Comparison Table -->
+                <div class="card">
+                    <div class="card-header" style="display: flex; justify-content: space-between; align-items: center;">
+                        <span>Detailed Summary</span>
+                        <button type="button" onclick="downloadSummaryReport()" style="padding: 8px 16px; background: #28a745; color: white; border: none; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer;">
+                            📥 Download Summary Report
+                        </button>
+                    </div>
+                    <div class="table-container">
+                        <table id="comparisonTable">
+                            <thead>
+                                <tr>
+                                    <th>Test Case ID</th>
+                                    <th>Test Name</th>
+                                    <th id="run1Header">Run 1 Status</th>
+                                    <th id="run2Header">Run 2 Status</th>
+                                    <th id="run3Header">Run 3 Status</th>
+                                    <th id="run4Header">Run 4 Status</th>
+                                    <th id="run5Header">Run 5 Status</th>
+                                    <th id="run6Header">Run 6 Status</th>
+                                    <th id="run7Header">Run 7 Status</th>
+                                </tr>
+                                <tr>
+                                    <th><input type="text" id="search_testCaseId" placeholder="Search..." oninput="searchTableColumns()" style="width: 100%; padding: 6px 8px; border: 1px solid #d0d0d0; border-radius: 4px; font-size: 12px; font-weight: normal;"></th>
+                                    <th><input type="text" id="search_testName" placeholder="Search..." oninput="searchTableColumns()" style="width: 100%; padding: 6px 8px; border: 1px solid #d0d0d0; border-radius: 4px; font-size: 12px; font-weight: normal;"></th>
+                                    <th><input type="text" id="search_run1" placeholder="Search..." oninput="searchTableColumns()" style="width: 100%; padding: 6px 8px; border: 1px solid #d0d0d0; border-radius: 4px; font-size: 12px; font-weight: normal;"></th>
+                                    <th style="display: none;"><input type="text" id="search_run2" placeholder="Search..." oninput="searchTableColumns()" style="width: 100%; padding: 6px 8px; border: 1px solid #d0d0d0; border-radius: 4px; font-size: 12px; font-weight: normal;"></th>
+                                    <th style="display: none;"><input type="text" id="search_run3" placeholder="Search..." oninput="searchTableColumns()" style="width: 100%; padding: 6px 8px; border: 1px solid #d0d0d0; border-radius: 4px; font-size: 12px; font-weight: normal;"></th>
+                                    <th style="display: none;"><input type="text" id="search_run4" placeholder="Search..." oninput="searchTableColumns()" style="width: 100%; padding: 6px 8px; border: 1px solid #d0d0d0; border-radius: 4px; font-size: 12px; font-weight: normal;"></th>
+                                    <th style="display: none;"><input type="text" id="search_run5" placeholder="Search..." oninput="searchTableColumns()" style="width: 100%; padding: 6px 8px; border: 1px solid #d0d0d0; border-radius: 4px; font-size: 12px; font-weight: normal;"></th>
+                                    <th style="display: none;"><input type="text" id="search_run6" placeholder="Search..." oninput="searchTableColumns()" style="width: 100%; padding: 6px 8px; border: 1px solid #d0d0d0; border-radius: 4px; font-size: 12px; font-weight: normal;"></th>
+                                    <th style="display: none;"><input type="text" id="search_run7" placeholder="Search..." oninput="searchTableColumns()" style="width: 100%; padding: 6px 8px; border: 1px solid #d0d0d0; border-radius: 4px; font-size: 12px; font-weight: normal;"></th>
+                                </tr>
+                            </thead>
+                            <tbody id="comparisonBody">
+                                <!-- Comparison results will be populated here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Page 3: Cumulative RTR Calculator -->
+        <div id="cumulativeRtr" class="page">
+            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 12px; margin-top: 20px;">
+                <!-- Test Rigor Section -->
+                <div class="card" style="padding: 12px;">
+                    <div class="card-header" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 10px; margin: -12px -12px 10px -12px; border-radius: 8px 8px 0 0;">
+                        <h2 style="font-size: 16px; margin: 0;">🧪 Test Rigor</h2>
+                    </div>
+                    <div class="form-group" style="margin-bottom: 8px;">
+                        <label style="font-size: 12px;">Total Test Cases</label>
+                        <input type="number" id="tr_total" class="form-control" placeholder="Enter total" min="0" oninput="calculateCumulativeRTR()" style="padding: 8px; font-size: 13px;">
+                    </div>
+                    <div class="form-group" style="margin-bottom: 8px;">
+                        <label style="font-size: 12px;">Passed</label>
+                        <input type="number" id="tr_passed" class="form-control" placeholder="Enter passed" min="0" oninput="calculateCumulativeRTR()" style="padding: 8px; font-size: 13px;">
+                    </div>
+                    <div class="form-group" style="margin-bottom: 8px;">
+                        <label style="font-size: 12px;">Valid Fail</label>
+                        <input type="number" id="tr_validFail" class="form-control" placeholder="Enter valid fail" min="0" oninput="calculateCumulativeRTR()" style="padding: 8px; font-size: 13px;">
+                    </div>
+                    <div class="result-box" id="tr_result" style="display: none; margin-top: 8px; padding: 8px; background: #f0f7ff; border-left: 4px solid #667eea; border-radius: 4px;">
+                        <div style="font-size: 13px; color: #333; margin-bottom: 3px;"><strong>RTR:</strong> <span id="tr_rtr">0%</span></div>
+                        <div style="font-size: 13px; color: #333;"><strong>Failed:</strong> <span id="tr_failed">0</span></div>
+                    </div>
+                </div>
+
+                <!-- POM Section -->
+                <div class="card" style="padding: 12px;">
+                    <div class="card-header" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); color: white; padding: 10px; margin: -12px -12px 10px -12px; border-radius: 8px 8px 0 0;">
+                        <h2 style="font-size: 16px; margin: 0;">⚙️ POM</h2>
+                    </div>
+                    <div class="form-group" style="margin-bottom: 8px;">
+                        <label style="font-size: 12px;">Total Test Cases</label>
+                        <input type="number" id="pom_total" class="form-control" placeholder="Enter total" min="0" oninput="calculateCumulativeRTR()" style="padding: 8px; font-size: 13px;">
+                    </div>
+                    <div class="form-group" style="margin-bottom: 8px;">
+                        <label style="font-size: 12px;">Passed</label>
+                        <input type="number" id="pom_passed" class="form-control" placeholder="Enter passed" min="0" oninput="calculateCumulativeRTR()" style="padding: 8px; font-size: 13px;">
+                    </div>
+                    <div class="form-group" style="margin-bottom: 8px;">
+                        <label style="font-size: 12px;">Valid Fail</label>
+                        <input type="number" id="pom_validFail" class="form-control" placeholder="Enter valid fail" min="0" oninput="calculateCumulativeRTR()" style="padding: 8px; font-size: 13px;">
+                    </div>
+                    <div class="result-box" id="pom_result" style="display: none; margin-top: 8px; padding: 8px; background: #fff0f5; border-left: 4px solid #f5576c; border-radius: 4px;">
+                        <div style="font-size: 13px; color: #333; margin-bottom: 3px;"><strong>RTR:</strong> <span id="pom_rtr">0%</span></div>
+                        <div style="font-size: 13px; color: #333;"><strong>Failed:</strong> <span id="pom_failed">0</span></div>
+                    </div>
+                </div>
+
+                <!-- JMeter Section -->
+                <div class="card" style="padding: 12px;">
+                    <div class="card-header" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); color: white; padding: 10px; margin: -12px -12px 10px -12px; border-radius: 8px 8px 0 0;">
+                        <h2 style="font-size: 16px; margin: 0;">⚡ JMeter</h2>
+                    </div>
+                    <div class="form-group" style="margin-bottom: 8px;">
+                        <label style="font-size: 12px;">Total Test Cases</label>
+                        <input type="number" id="jmeter_total" class="form-control" placeholder="Enter total" min="0" oninput="calculateCumulativeRTR()" style="padding: 8px; font-size: 13px;">
+                    </div>
+                    <div class="form-group" style="margin-bottom: 8px;">
+                        <label style="font-size: 12px;">Passed</label>
+                        <input type="number" id="jmeter_passed" class="form-control" placeholder="Enter passed" min="0" oninput="calculateCumulativeRTR()" style="padding: 8px; font-size: 13px;">
+                    </div>
+                    <div class="form-group" style="margin-bottom: 8px;">
+                        <label style="font-size: 12px;">Valid Fail</label>
+                        <input type="number" id="jmeter_validFail" class="form-control" placeholder="Enter valid fail" min="0" oninput="calculateCumulativeRTR()" style="padding: 8px; font-size: 13px;">
+                    </div>
+                    <div class="result-box" id="jmeter_result" style="display: none; margin-top: 8px; padding: 8px; background: #f0fbff; border-left: 4px solid #00f2fe; border-radius: 4px;">
+                        <div style="font-size: 13px; color: #333; margin-bottom: 3px;"><strong>RTR:</strong> <span id="jmeter_rtr">0%</span></div>
+                        <div style="font-size: 13px; color: #333;"><strong>Failed:</strong> <span id="jmeter_failed">0</span></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Overall Results -->
+            <div class="card" id="cumulativeResults" style="padding: 12px; display: none;">
+                <!-- Overall Cumulative Results -->
+                <div>
+                    <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 12px; border-radius: 8px; text-align: center;">
+                        <h2 style="font-size: 18px; margin: 0 0 10px 0;">📊 Overall Cumulative Results</h2>
+                        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px;">
+                            <div>
+                                <div style="font-size: 12px; opacity: 0.9; margin-bottom: 3px;">Total Test Cases</div>
+                                <div style="font-size: 22px; font-weight: bold;" id="overall_total">0</div>
+                            </div>
+                            <div>
+                                <div style="font-size: 12px; opacity: 0.9; margin-bottom: 3px;">Overall RTR</div>
+                                <div style="font-size: 22px; font-weight: bold;" id="overall_rtr">0%</div>
+                            </div>
+                            <div>
+                                <div style="font-size: 12px; opacity: 0.9; margin-bottom: 3px;">Total Failed</div>
+                                <div style="font-size: 22px; font-weight: bold;" id="overall_failed">0</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Navigation functionality
+        const navLinks = document.querySelectorAll('.nav-link');
+        const pages = document.querySelectorAll('.page');
+        
+        navLinks.forEach(link => {
+            link.addEventListener('click', function() {
+                const targetPage = this.getAttribute('data-page');
+                
+                // Update active nav link
+                navLinks.forEach(l => l.classList.remove('active'));
+                this.classList.add('active');
+                
+                // Show target page
+                pages.forEach(page => page.classList.remove('active'));
+                document.getElementById(targetPage).classList.add('active');
+            });
+        });
+        
+        // Global variables
+        let currentFailures = [];
+        let filteredFailures = [];
+        let comparisonData = null; // Store comparison data for download
+        
+        // Page 1: Generate Failure Report
+        const form = document.getElementById('reportForm');
+        const loader = document.getElementById('loader');
+        const message = document.getElementById('message');
+        const submitBtn = document.getElementById('submitBtn');
+        const suiteSelect = document.getElementById('suite');
+        const runIdInput = document.getElementById('runId');
+        let currentRunId = null;
+        let currentSuite = null;
+        
+        function checkFormValidity() {
+            const suite = suiteSelect.value.trim();
+            const runId = runIdInput.value.trim();
+            submitBtn.disabled = !(suite && runId);
+        }
+        
+        suiteSelect.addEventListener('change', checkFormValidity);
+        runIdInput.addEventListener('input', checkFormValidity);
+        
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const suite = suiteSelect.value.trim();
+            const runId = runIdInput.value.trim();
+            
+            if (!suite || !runId) {
+                showMessage('Please fill in all fields', 'error');
+                return;
+            }
+            
+            loader.classList.add('active');
+            message.classList.remove('active');
+            submitBtn.disabled = true;
+            
+            try {
+                const response = await fetch('/api/generate-report', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ suite, run_id: runId })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok && data.success) {
+                    // Store current run info for rerun functionality
+                    currentRunId = runId;
+                    currentSuite = suite;
+                    
+                    // Store complete data for View Report functionality
+                    window.currentReportData = {
+                        ...data.report_data,
+                        total_tests: data.total_tests,
+                        failed_tests: data.failed_tests,
+                        report_path: data.report_path
+                    };
+                    
+                    currentFailures = data.failures || [];
+                    filteredFailures = [...currentFailures];
+                    
+                    const rerunButton = data.failed_tests > 0 
+                        ? `<button class="rerun-btn" onclick="rerunFailedTests()" id="rerunBtn" style="margin-top: 0;">
+                            🔄 Rerun ${data.failed_tests} Failed Test(s)
+                           </button>`
+                        : '';
+                    
+                    showMessage(
+                        `<div style="text-align: center;">
+                            <strong style="font-size: 18px; display: block; margin-bottom: 20px;">✅ Report Generated Successfully!</strong>
+                            <div class="stats" style="margin-bottom: 25px;">
+                                <div class="stat-item">
+                                    <div class="stat-value">${data.total_tests}</div>
+                                    <div class="stat-label">Total Tests</div>
+                                </div>
+                                <div class="stat-item">
+                                    <div class="stat-value">${data.failed_tests}</div>
+                                    <div class="stat-label">Failed Tests</div>
+                                </div>
+                            </div>
+                            <div class="button-group" style="margin-top: 0;">
+                                <button class="view-report-btn" onclick="viewReport()">
+                                    📊 View Report
+                                </button>
+                                <a href="/api/download-report/${data.report_path}" class="download-link">
+                                    📥 Download Excel
+                                </a>
+                                ${rerunButton}
+                            </div>
+                        </div>`,
+                        'success'
+                    );
+                } else {
+                    showMessage(data.error || 'Failed to generate report', 'error');
+                }
+            } catch (error) {
+                showMessage('An error occurred: ' + error.message, 'error');
+            } finally {
+                loader.classList.remove('active');
+                submitBtn.disabled = false;
+            }
+        });
+        
+        async function rerunFailedTests() {
+            if (!currentRunId || !currentSuite) {
+                showMessage('No run ID or suite available. Please generate a report first.', 'error');
+                return;
+            }
+            
+            const rerunBtn = document.getElementById('rerunBtn');
+            if (rerunBtn) {
+                rerunBtn.disabled = true;
+                rerunBtn.textContent = '⏳ Triggering rerun...';
+            }
+            
+            try {
+                const response = await fetch('/api/rerun-failed', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ 
+                        suite: currentSuite,
+                        run_id: currentRunId,
+                        custom_name: `Rerun Failed - ${currentRunId} - ${new Date().toLocaleString()}`
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok && data.success) {
+                    showMessage(
+                        `<strong>✅ Rerun Triggered Successfully!</strong><br>
+                        <p style="margin-top: 10px;">Rerunning ${data.failed_tests_count} failed test case(s)</p>
+                        ${data.task_id ? `<p>Task ID: ${data.task_id}</p>` : ''}
+                        ${data.queue_id ? `<p>Queue ID: ${data.queue_id}</p>` : ''}
+                        <p style="margin-top: 10px; font-size: 12px; color: #666;">Check TestRigor dashboard for rerun progress</p>`,
+                        'success'
+                    );
+                } else {
+                    showMessage(`Failed to trigger rerun: ${data.error || 'Unknown error'}`, 'error');
+                    if (rerunBtn) {
+                        rerunBtn.disabled = false;
+                        rerunBtn.textContent = `🔄 Rerun Failed Tests`;
+                    }
+                }
+            } catch (error) {
+                showMessage('An error occurred: ' + error.message, 'error');
+                if (rerunBtn) {
+                    rerunBtn.disabled = false;
+                    rerunBtn.textContent = `🔄 Rerun Failed Tests`;
+                }
+            }
+        }
+        
+        function showMessage(text, type) {
+            message.innerHTML = text;
+            message.className = 'message active ' + type;
+        }
+        
+        function viewReport() {
+            if (window.currentReportData) {
+                // currentReportData now stores the report_data object directly
+                const reportData = window.currentReportData;
+                
+                // Build HTML for embedded report display
+                let html = `
+                    <style>
+                        * {
+                            margin: 0;
+                            padding: 0;
+                            box-sizing: border-box;
+                        }
+                        
+                        body {
+                            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                            background: #f5f5f5;
+                            padding: 20px;
+                        }
+                        
+                        .report-container {
+                            max-width: 1400px;
+                            margin: 0 auto;
+                            background: white;
+                            border-radius: 10px;
+                            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+                            overflow: hidden;
+                        }
+                        
+                        .report-header {
+                            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                            color: white;
+                            padding: 15px 20px;
+                            text-align: center;
+                        }
+                        
+                        .report-header h1 {
+                            font-size: 24px;
+                            margin: 0;
+                        }
+                        
+                        .report-info {
+                            background: white;
+                            padding: 12px 20px;
+                            border-bottom: 2px solid #667eea;
+                        }
+                        
+                        .report-info-grid {
+                            display: grid;
+                            grid-template-columns: repeat(4, 1fr);
+                            gap: 15px;
+                            margin-bottom: 0;
+                        }
+                        
+                        .report-info-item {
+                            display: flex;
+                            flex-direction: column;
+                        }
+                        
+                        .report-info-label {
+                            font-size: 11px;
+                            color: #666;
+                            font-weight: 600;
+                            margin-bottom: 3px;
+                        }
+                        
+                        .report-info-value {
+                            font-size: 13px;
+                            color: #333;
+                            font-weight: 500;
+                        }
+                        
+                        .stats {
+                            display: flex;
+                            justify-content: center;
+                            gap: 40px;
+                            padding: 12px 20px;
+                            background: #f8f9fa;
+                        }
+                        
+                        .stat-item {
+                            text-align: center;
+                        }
+                        
+                        .stat-value {
+                            font-size: 24px;
+                            font-weight: bold;
+                            color: #667eea;
+                        }
+                        
+                        .stat-label {
+                            font-size: 12px;
+                            color: #666;
+                            margin-top: 3px;
+                        }
+                        
+                        .report-actions {
+                            text-align: center;
+                            padding: 12px 20px;
+                            background: white;
+                            border-bottom: 1px solid #e0e0e0;
+                        }
+                        
+                        .download-btn {
+                            display: inline-block;
+                            padding: 8px 20px;
+                            background: #28a745;
+                            color: white;
+                            text-decoration: none;
+                            border-radius: 5px;
+                            font-weight: 600;
+                            font-size: 13px;
+                        }
+                        
+                        .download-btn:hover {
+                            background: #218838;
+                        }
+                        
+                        .table-container {
+                            overflow-x: auto;
+                            padding: 0;
+                        }
+                        
+                        .report-table {
+                            width: 100%;
+                            border-collapse: collapse;
+                            background: white;
+                            table-layout: fixed;
+                        }
+                        
+                        .report-table th {
+                            background: #667eea;
+                            color: white;
+                            padding: 12px 8px;
+                            font-size: 13px;
+                            font-weight: 600;
+                            text-align: left;
+                            position: sticky;
+                            top: 0;
+                            z-index: 10;
+                        }
+                        
+                        .report-table th:nth-child(1) { width: 7%; }
+                        .report-table th:nth-child(2) { width: 17%; }
+                        .report-table th:nth-child(3) { width: 7%; }
+                        .report-table th:nth-child(4) { width: 7%; }
+                        .report-table th:nth-child(5) { width: 24%; }
+                        .report-table th:nth-child(6) { width: 22%; }
+                        .report-table th:nth-child(7) { width: 10%; }
+                        .report-table th:nth-child(8) { width: 6%; text-align: center; }
+                        
+                        .report-table td {
+                            padding: 10px 8px;
+                            border-bottom: 1px solid #e0e0e0;
+                            font-size: 13px;
+                            color: #333;
+                            vertical-align: top;
+                            word-wrap: break-word;
+                            overflow-wrap: break-word;
+                        }
+                        
+                        .report-table tr:hover {
+                            background: #f5f5f5;
+                        }
+                        
+                        .failed-command {
+                            font-family: 'Courier New', monospace;
+                            font-size: 12px;
+                            white-space: pre-wrap;
+                            line-height: 1.8;
+                            background: #f8f9fa;
+                            padding: 8px;
+                            border-radius: 4px;
+                        }
+                        
+                        .error-message {
+                            color: #d32f2f;
+                        }
+                        
+                        .status-failed {
+                            color: #d32f2f;
+                            font-weight: 600;
+                        }
+                        
+                        .screenshot-link {
+                            color: #667eea;
+                            text-decoration: none;
+                            font-size: 12px;
+                            display: block;
+                            margin-bottom: 3px;
+                        }
+                        
+                        .screenshot-link:hover {
+                            text-decoration: underline;
+                        }
+                        
+                        .action-icons {
+                            display: flex;
+                            gap: 8px;
+                            justify-content: center;
+                            align-items: center;
+                        }
+                        
+                        .action-link {
+                            font-size: 16px;
+                            text-decoration: none;
+                            transition: all 0.2s;
+                            display: inline-flex;
+                            align-items: center;
+                            justify-content: center;
+                            padding: 4px;
+                            border-radius: 4px;
+                        }
+                        
+                        .action-link:hover {
+                            transform: scale(1.15);
+                            background-color: rgba(102, 126, 234, 0.1);
+                        }
+                    </style>
+                    <div class="report-container">
+                        <div class="report-header">
+                            <h1>🔍 Test Rigor Failure Report</h1>
+                        </div>
+                        
+                        <div class="report-info">
+                            <div class="report-info-grid">
+                                <div class="report-info-item">
+                                    <div class="report-info-label">Suite Name</div>
+                                    <div class="report-info-value">${reportData.suite_name}</div>
+                                </div>
+                                <div class="report-info-item">
+                                    <div class="report-info-label">Run ID</div>
+                                    <div class="report-info-value">${reportData.run_id}</div>
+                                </div>
+                                <div class="report-info-item">
+                                    <div class="report-info-label">Run Name</div>
+                                    <div class="report-info-value">${reportData.run_name}</div>
+                                </div>
+                                <div class="report-info-item">
+                                    <div class="report-info-label">Status</div>
+                                    <div class="report-info-value">${reportData.status}</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Filters & Selection -->
+                        <div style="background: #f8f9fa; padding: 15px; border-top: 1px solid #e0e0e0;">
+                            <h3 style="font-size: 14px; margin-bottom: 10px; color: #333;">🔍 Filters & Selection</h3>
+                            
+                            <div style="display: flex; gap: 10px; margin-bottom: 10px;">
+                                <input type="text" id="viewReportFilterCaseId" placeholder="Filter by Case ID(s) - e.g., C12345, C12346, C12347" style="flex: 1; padding: 8px; border: 1px solid #ddd; border-radius: 4px; font-size: 13px;" onkeyup="filterViewReport()">
+                                <input type="text" id="viewReportFilterError" placeholder="Filter by Error Message" style="flex: 1; padding: 8px; border: 1px solid #ddd; border-radius: 4px; font-size: 13px;" onkeyup="filterViewReport()">
+                            </div>
+                            <div style="display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; position: relative;">
+                                <button onclick="clearViewReportFilters()" class="btn-secondary" style="padding: 6px 14px; font-size: 13px;">Clear Filters</button>
+                                <button onclick="selectAllViewReport()" class="btn-secondary" style="padding: 6px 14px; font-size: 13px;">Select All</button>
+                                <button onclick="deselectAllViewReport()" class="btn-secondary" style="padding: 6px 14px; font-size: 13px;">Deselect All</button>
+                                <button onclick="rerunSelectedFromView()" id="viewReportRerunBtn" class="btn-success" style="padding: 6px 14px; font-size: 13px;">▶ Rerun Selected Tests</button>
+                                <div id="viewReportLoader" style="display: none; position: absolute; right: 10px; top: 50%; transform: translateY(-50%);">
+                                    <div class="loader" style="border: 2px solid #f3f3f3; border-top: 2px solid #667eea; border-radius: 50%; width: 20px; height: 20px; animation: spin 1s linear infinite;"></div>
+                                </div>
+                            </div>
+                            
+                            <!-- Message area for rerun status (below buttons) -->
+                            <div id="viewReportMessage" style="display: none; padding: 10px; margin-top: 10px; border-radius: 4px; font-size: 13px;"></div>
+                            
+                            <div style="margin-top: 10px; text-align: center; font-size: 13px; color: #666;">
+                                Selected: <span id="viewReportSelectedCount">0</span> | 
+                                Filtered: <span id="viewReportFilteredCount">0</span> | 
+                                Total: <span id="viewReportTotalCount">0</span>
+                            </div>
+                        </div>
+                        
+                        <div class="table-container">
+                            <table class="report-table">
+                                <thead>
+                                    <tr>
+                                        <th style="width: 3%;"><input type="checkbox" id="viewReportSelectAll" onchange="toggleAllViewReport(this)"></th>
+                                        <th style="width: 8%;">Test Case ID</th>
+                                        <th style="width: 20%;">Test Name</th>
+                                        <th style="width: 6%;">Failed Screenshot#</th>
+                                        <th style="width: 29%;">Failed Command</th>
+                                        <th style="width: 20%;">Error Message</th>
+                                        <th style="width: 8%;">Screenshots</th>
+                                        <th style="width: 6%;">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="viewReportTableBody">
+                `;
+                
+                // Suite ID mapping for Edit URLs (specifically for editing test cases)
+                const editSuiteIds = {
+                    'CoreHR-MasterSuite-STG': 'duuLZcXDKFGEB48SM',
+                    'HRIS-CoreHR-QA': 'duuLZcXDKFGEB48SM',
+                    'HRIS-US-CoreHR': '2763cy23XJ4fryTXw',
+                    'HRIS-US-CoreHR-QA': '2763cy23XJ4fryTXw',
+                    'HRIS-US-PAY-QA': 'XdBv6x6srdPCPtAyT',
+                    'HRIS-US-PAY': 'XdBv6x6srdPCPtAyT',
+                    'Payroll-QA': 'e3vPALEP4hedL3MpR',
+                    'Payroll-MasterSuite-STG': 'e3vPALEP4hedL3MpR',
+                    'HRIS-US-TA-QA': 'otFdy9rcEsvhiKnjR',
+                    'HRIS-US-TA': 'otFdy9rcEsvhiKnjR',
+                    'Time and Attendance-QA': 'HPRXfAf6SdzjszhAD',
+                    'Time and Attendance-MasterSuite-STG': 'HPRXfAf6SdzjszhAD',
+                    'Benefits-QA': 'AGoddc4YFX4XZ2yzX',
+                    'Benefits-MasterSuite-STG': 'AGoddc4YFX4XZ2yzX',
+                    'HRIS-US-BEN': 'jFr7mnnNpqz3yaYaN',
+                    'HRIS-US-BEN-QA': 'jFr7mnnNpqz3yaYaN',
+                    'HRIS-US-SCHD-QA': 'QSnP87sG5WPGWZwkM',
+                    'HRIS-US-SCHD': 'QSnP87sG5WPGWZwkM',
+                    'Schedule-QA': 'zSK7y99JWzZwjWjiu',
+                    'Schedule-MasterSuite-STG': 'zSK7y99JWzZwjWjiu',
+                    'Neogov Common-QA': 'oLptoJk8KshiNrB74',
+                    'Neogov Common': 'oLptoJk8KshiNrB74'
+                };
+                
+                const editSuiteId = editSuiteIds[reportData.suite_name] || '';
+                
+                // Store failures globally for filtering and rerun
+                window.viewReportFailures = reportData.failures;
+                window.viewReportSuite = reportData.suite_name;
+                
+                // Add table rows
+                reportData.failures.forEach((failure, index) => {
+                    // Format failed command to bold "Step X:" patterns
+                    const formattedCommand = failure.failed_command.replace(/^(Step \d+:)/gm, '<strong>$1</strong>');
+                    
+                    html += `<tr data-index="${index}" data-test-case-id="${failure.test_case_id}">`;
+                    html += `<td><input type="checkbox" class="view-report-checkbox" data-index="${index}" data-uuid="${failure.test_case_uuid}" onchange="updateViewReportCount()"></td>`;
+                    html += `<td>${failure.test_case_id}</td>`;
+                    html += `<td>${failure.test_name}</td>`;
+                    html += `<td>${failure.screenshot_number}</td>`;
+                    html += `<td class="failed-command">${formattedCommand}</td>`;
+                    html += `<td class="error-message" data-error-text="${index}">${failure.error_message}</td>`;
+                    html += `<td>`;
+                    if (failure.screenshot_urls && failure.screenshot_urls.length > 0) {
+                        failure.screenshot_urls.forEach((url, index) => {
+                            html += `<a href="${url}" target="_blank" class="screenshot-link">Screenshot ${index + 1}</a>`;
+                        });
+                    } else {
+                        html += 'N/A';
+                    }
+                    html += `</td>`;
+                    html += `<td><div class="action-icons">`;
+                    if (failure.test_case_uuid && editSuiteId) {
+                        html += `<a href="https://app.testrigor.com/test-suites/${editSuiteId}/test-cases/${failure.test_case_uuid}" target="_blank" class="action-link" title="Edit Test Case">✏️</a>`;
+                    } else {
+                        html += 'N/A';
+                    }
+                    html += `</div></td>`;
+                    html += `</tr>`;
+                });
+                
+                html += `
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                `;
+                
+                // Display report in the page
+                const reportDisplay = document.getElementById('reportDisplay');
+                reportDisplay.innerHTML = html;
+                reportDisplay.style.display = 'block';
+                
+                // Initialize counters
+                updateViewReportCount();
+                
+                // Scroll to the report
+                reportDisplay.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+        }
+        
+        // Filter view report table
+        function filterViewReport() {
+            const caseIdFilterInput = document.getElementById('viewReportFilterCaseId').value.trim();
+            const errorFilter = document.getElementById('viewReportFilterError').value.toLowerCase().trim();
+            
+            const tbody = document.getElementById('viewReportTableBody');
+            if (!tbody) return;
+            
+            // Parse case IDs - handle comma-separated values
+            let caseIdFilters = [];
+            if (caseIdFilterInput) {
+                caseIdFilters = caseIdFilterInput.split(',').map(id => id.trim().toLowerCase()).filter(id => id);
+            }
+            
+            // Always filter from ALL rows in the table (complete dataset)
+            const rows = tbody.querySelectorAll('tr');
+            let visibleCount = 0;
+            
+            rows.forEach(row => {
+                const caseId = (row.dataset.testCaseId || '').toLowerCase();
+                const rowIndex = row.dataset.index;
+                
+                // Get error message from stored failures array (avoids HTML encoding issues)
+                const errorMessage = window.viewReportFailures && window.viewReportFailures[rowIndex] 
+                    ? (window.viewReportFailures[rowIndex].error_message || '').toLowerCase() 
+                    : '';
+                
+                let matchesCase = true;
+                let matchesError = true;
+                
+                // Check case ID filter (multiple IDs)
+                if (caseIdFilters.length > 0) {
+                    matchesCase = caseIdFilters.some(filterId => caseId.includes(filterId));
+                }
+                
+                // Check error message filter
+                if (errorFilter) {
+                    matchesError = errorMessage.includes(errorFilter);
+                }
+                
+                if (matchesCase && matchesError) {
+                    row.style.display = '';
+                    visibleCount++;
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+            
+            updateViewReportCount();
+        }
+        
+        // Clear view report filters
+        function clearViewReportFilters() {
+            document.getElementById('viewReportFilterCaseId').value = '';
+            document.getElementById('viewReportFilterError').value = '';
+            
+            const tbody = document.getElementById('viewReportTableBody');
+            if (!tbody) return;
+            
+            const rows = tbody.querySelectorAll('tr');
+            rows.forEach(row => {
+                row.style.display = '';
+            });
+            
+            // Uncheck the "Select All" checkbox but keep individual selections
+            const selectAllCheckbox = document.getElementById('viewReportSelectAll');
+            if (selectAllCheckbox) {
+                selectAllCheckbox.checked = false;
+            }
+            
+            updateViewReportCount();
+        }
+        
+        // Select all visible checkboxes in view report
+        function selectAllViewReport() {
+            const checkboxes = document.querySelectorAll('#viewReportTableBody tr:not([style*="display: none"]) .view-report-checkbox');
+            checkboxes.forEach(cb => cb.checked = true);
+            document.getElementById('viewReportSelectAll').checked = true;
+            updateViewReportCount();
+        }
+        
+        // Deselect all checkboxes in view report
+        function deselectAllViewReport() {
+            const checkboxes = document.querySelectorAll('.view-report-checkbox');
+            checkboxes.forEach(cb => cb.checked = false);
+            document.getElementById('viewReportSelectAll').checked = false;
+            updateViewReportCount();
+        }
+        
+        // Toggle all visible checkboxes in view report
+        function toggleAllViewReport(checkbox) {
+            const checkboxes = document.querySelectorAll('#viewReportTableBody tr:not([style*="display: none"]) .view-report-checkbox');
+            checkboxes.forEach(cb => cb.checked = checkbox.checked);
+            updateViewReportCount();
+        }
+        
+        // Update view report counters
+        function updateViewReportCount() {
+            const allCheckboxes = document.querySelectorAll('.view-report-checkbox');
+            const visibleRows = document.querySelectorAll('#viewReportTableBody tr:not([style*="display: none"])');
+            
+            let selectedCount = 0;
+            allCheckboxes.forEach(cb => {
+                if (cb.checked) selectedCount++;
+            });
+            
+            document.getElementById('viewReportSelectedCount').textContent = selectedCount;
+            document.getElementById('viewReportFilteredCount').textContent = visibleRows.length;
+            document.getElementById('viewReportTotalCount').textContent = allCheckboxes.length;
+        }
+        
+        // Rerun selected tests from view report
+        async function rerunSelectedFromView() {
+            console.log('rerunSelectedFromView called');
+            const selectedCheckboxes = document.querySelectorAll('.view-report-checkbox:checked');
+            console.log('Selected checkboxes:', selectedCheckboxes.length);
+            
+            if (selectedCheckboxes.length === 0) {
+                alert('Please select at least one test to rerun');
+                return;
+            }
+            
+            const testUuids = Array.from(selectedCheckboxes).map(cb => cb.dataset.uuid).filter(uuid => uuid);
+            console.log('Test UUIDs:', testUuids);
+            
+            if (testUuids.length === 0) {
+                alert('Selected tests do not have valid UUIDs. Cannot trigger rerun.');
+                return;
+            }
+            
+            console.log('currentReportData:', window.currentReportData);
+            if (!window.currentReportData || !window.currentReportData.run_id) {
+                alert('Run information not available. Data: ' + JSON.stringify(window.currentReportData));
+                return;
+            }
+            
+            const suite = window.viewReportSuite || window.currentReportData.suite_name;
+            const runId = window.currentReportData.run_id;
+            console.log('Suite:', suite, 'Run ID:', runId);
+            
+            const rerunBtn = document.getElementById('viewReportRerunBtn');
+            const loader = document.getElementById('viewReportLoader');
+            const message = document.getElementById('viewReportMessage');
+            
+            if (rerunBtn) rerunBtn.disabled = true;
+            if (loader) loader.style.display = 'block';
+            if (message) message.style.display = 'none';
+            
+            try {
+                const response = await fetch('/api/rerun-selected', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({
+                        suite: suite,
+                        run_id: runId,
+                        test_case_uuids: testUuids,
+                        custom_name: `Rerun Selected - ${runId}`
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok && data.success) {
+                    if (message) {
+                        message.innerHTML = `<strong>✅ Rerun Triggered Successfully!</strong><br>
+                            <p style="margin-top: 10px;">Rerunning ${data.failed_tests_count} selected test case(s)</p>
+                            ${data.task_id ? `<p>Task ID: ${data.task_id}</p>` : ''}
+                            ${data.queue_id ? `<p>Queue ID: ${data.queue_id}</p>` : ''}
+                            <p style="margin-top: 10px; font-size: 12px; color: #666;">Check TestRigor dashboard for rerun progress</p>`;
+                        message.className = 'message active success';
+                        message.style.cssText = '';
+                    }
+                    // Clear all selections after successful rerun
+                    deselectAllViewReport();
+                } else {
+                    if (message) {
+                        message.innerHTML = `Failed to trigger rerun: ${data.error || 'Unknown error'}`;
+                        message.className = 'message active error';
+                        message.style.cssText = '';
+                    }
+                }
+            } catch (error) {
+                console.error('Rerun error:', error);
+                if (message) {
+                    message.innerHTML = 'An error occurred: ' + error.message;
+                    message.style.cssText = 'display: block; background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb;';
+                }
+            } finally {
+                if (loader) loader.style.display = 'none';
+                if (rerunBtn) rerunBtn.disabled = false;
+            }
+        }
+        
+        // Page 2: Compare TR Runs & Calculate RTR
+        // Add input listeners for button validation
+        document.getElementById('compareSuite').addEventListener('change', updateCompareButtons);
+        document.getElementById('runId1').addEventListener('input', updateCompareButtons);
+        document.getElementById('runId2').addEventListener('input', updateCompareButtons);
+        document.getElementById('runId3').addEventListener('input', updateCompareButtons);
+        document.getElementById('runId4').addEventListener('input', updateCompareButtons);
+        document.getElementById('runId5').addEventListener('input', updateCompareButtons);
+        document.getElementById('runId6').addEventListener('input', updateCompareButtons);
+        document.getElementById('runId7').addEventListener('input', updateCompareButtons);
+        
+
+        
+        function updateCompareButtons() {
+            const suite = document.getElementById('compareSuite').value.trim();
+            const runId1 = document.getElementById('runId1').value.trim();
+            const runId2 = document.getElementById('runId2').value.trim();
+            const runId3 = document.getElementById('runId3').value.trim();
+            const runId4 = document.getElementById('runId4').value.trim();
+            const runId5 = document.getElementById('runId5').value.trim();
+            const runId6 = document.getElementById('runId6').value.trim();
+            const runId7 = document.getElementById('runId7').value.trim();
+            
+            const calculateRtrBtn = document.getElementById('calculateRtrBtn');
+            const compareRunsBtn = document.getElementById('compareRunsBtn');
+            const mergeRunsBtn = document.getElementById('mergeRunsBtn');
+            
+            // Calculate RTR: enabled when only Run ID 1 is provided (and suite)
+            if (suite && runId1 && !runId2 && !runId3 && !runId4 && !runId5 && !runId6 && !runId7) {
+                calculateRtrBtn.disabled = false;
+                compareRunsBtn.disabled = true;
+                mergeRunsBtn.disabled = true;
+                mergeRunsBtn.style.opacity = '0.5';
+                mergeRunsBtn.style.cursor = 'not-allowed';
+            }
+            // Compare Runs: enabled when more than 1 Run ID is provided (and suite)
+            else if (suite && runId1 && (runId2 || runId3 || runId4 || runId5 || runId6 || runId7)) {
+                calculateRtrBtn.disabled = true;
+                compareRunsBtn.disabled = false;
+                
+                // Enable Merge button only if Run ID 1 and Run ID 2 are provided (not Run ID 3-7)
+                if (suite && runId1 && runId2) {
+                    mergeRunsBtn.disabled = false;
+                    mergeRunsBtn.style.opacity = '1';
+                    mergeRunsBtn.style.cursor = 'pointer';
+                } else {
+                    mergeRunsBtn.disabled = true;
+                    mergeRunsBtn.style.opacity = '0.5';
+                    mergeRunsBtn.style.cursor = 'not-allowed';
+                }
+            }
+            // Disable all if conditions not met
+            else {
+                calculateRtrBtn.disabled = true;
+                compareRunsBtn.disabled = true;
+                mergeRunsBtn.disabled = true;
+                mergeRunsBtn.style.opacity = '0.5';
+                mergeRunsBtn.style.cursor = 'not-allowed';
+            }
+        }
+        
+        // Validate no duplicate Run IDs
+        function validateNoDuplicateRunIds(runId1, runId2, runId3, runId4, runId5, runId6, runId7) {
+            const runIds = [];
+            if (runId1) runIds.push(runId1);
+            if (runId2) runIds.push(runId2);
+            if (runId3) runIds.push(runId3);
+            if (runId4) runIds.push(runId4);
+            if (runId5) runIds.push(runId5);
+            if (runId6) runIds.push(runId6);
+            if (runId7) runIds.push(runId7);
+            
+            // Check for duplicates
+            const uniqueRunIds = new Set(runIds);
+            if (uniqueRunIds.size !== runIds.length) {
+                return 'Duplicate Run IDs detected. Please ensure all Run IDs are unique.';
+            }
+            return null; // No duplicates
+        }
+        
+        async function calculateRtr() {
+            const suite = document.getElementById('compareSuite').value.trim();
+            const runId1 = document.getElementById('runId1').value.trim();
+            const compareLoader = document.getElementById('compareLoader');
+            const compareMessage = document.getElementById('compareMessage');
+            
+            if (!suite || !runId1) {
+                compareMessage.innerHTML = 'Please fill in Suite and Run ID 1';
+                compareMessage.className = 'message active error';
+                return;
+            }
+            
+            compareLoader.classList.add('active');
+            compareMessage.innerHTML = 'Calculating RTR... Please wait';
+            compareMessage.className = 'message active';
+            document.getElementById('comparisonResults').style.display = 'none';
+            
+            try {
+                // Fetch data for Run 1 only
+                const data1 = await fetchRunData(suite, runId1);
+                
+                if (data1) {
+                    // Display with only Run 1 data (Run 2 and Run 3 will be hidden)
+                    displayComparison(data1, null, null);
+                    document.getElementById('comparisonResults').style.display = 'block';
+                    compareMessage.innerHTML = 'RTR calculation complete!';
+                    compareMessage.className = 'message active success';
+                    
+                    // Clear Valid Fail input fields
+                    document.getElementById('run1ValidFail').value = '';
+                    document.getElementById('run2ValidFail').value = '';
+                    document.getElementById('run3ValidFail').value = '';
+                    updateRecalculateButton();
+                } else {
+                    throw new Error('Failed to fetch run data');
+                }
+            } catch (error) {
+                compareMessage.innerHTML = 'Error: ' + error.message;
+                compareMessage.className = 'message active error';
+            } finally {
+                compareLoader.classList.remove('active');
+            }
+        }
+        
+        async function compareRuns() {
+            const suite = document.getElementById('compareSuite').value.trim();
+            const runId1 = document.getElementById('runId1').value.trim();
+            const runId2 = document.getElementById('runId2').value.trim();
+            const runId3 = document.getElementById('runId3').value.trim();
+            const runId4 = document.getElementById('runId4').value.trim();
+            const runId5 = document.getElementById('runId5').value.trim();
+            const runId6 = document.getElementById('runId6').value.trim();
+            const runId7 = document.getElementById('runId7').value.trim();
+            
+            const compareLoader = document.getElementById('compareLoader');
+            const compareMessage = document.getElementById('compareMessage');
+            
+            if (!suite || !runId1 || (!runId2 && !runId3 && !runId4 && !runId5 && !runId6 && !runId7)) {
+                compareMessage.innerHTML = 'Please fill in Suite, Run ID 1, and at least one more Run ID';
+                compareMessage.className = 'message active error';
+                return;
+            }
+            
+            // Check for duplicate Run IDs
+            const duplicateError = validateNoDuplicateRunIds(runId1, runId2, runId3, runId4, runId5, runId6, runId7);
+            if (duplicateError) {
+                compareMessage.innerHTML = duplicateError;
+                compareMessage.className = 'message active error';
+                compareMessage.style.display = 'block';
+                return;
+            }
+            
+            compareLoader.classList.add('active');
+            compareMessage.style.display = 'none';
+            compareMessage.innerHTML = '';
+            compareMessage.className = 'message';
+            document.getElementById('comparisonResults').style.display = 'none';
+            
+            try {
+                // Fetch reports (Run 2-7 are optional, but at least one must be provided)
+                const promises = [fetchRunData(suite, runId1)];
+                if (runId2) promises.push(fetchRunData(suite, runId2));
+                if (runId3) promises.push(fetchRunData(suite, runId3));
+                if (runId4) promises.push(fetchRunData(suite, runId4));
+                if (runId5) promises.push(fetchRunData(suite, runId5));
+                if (runId6) promises.push(fetchRunData(suite, runId6));
+                if (runId7) promises.push(fetchRunData(suite, runId7));
+                
+                const results = await Promise.all(promises);
+                let resultIndex = 0;
+                const data1 = results[resultIndex++];
+                const data2 = runId2 ? results[resultIndex++] : null;
+                const data3 = runId3 ? results[resultIndex++] : null;
+                const data4 = runId4 ? results[resultIndex++] : null;
+                const data5 = runId5 ? results[resultIndex++] : null;
+                const data6 = runId6 ? results[resultIndex++] : null;
+                const data7 = runId7 ? results[resultIndex++] : null;
+                
+                displayComparison(data1, data2, data3, data4, data5, data6, data7);
+                document.getElementById('comparisonResults').style.display = 'block';
+                const runCount = [data1, data2, data3, data4, data5, data6, data7].filter(d => d !== null).length;
+                compareMessage.innerHTML = `Comparison & RTR calculation complete for ${runCount} run${runCount > 1 ? 's' : ''}!`;
+                compareMessage.className = 'message active success';
+                compareMessage.style.display = 'block';
+                
+                // Clear Valid Fail fields after comparison
+                clearValidFailFields();
+            } catch (error) {
+                compareMessage.innerHTML = error.message;
+                compareMessage.className = 'message active error';
+                compareMessage.style.display = 'block';
+                document.getElementById('comparisonResults').style.display = 'none';
+            } finally {
+                compareLoader.classList.remove('active');
+            }
+        }
+        
+        async function fetchRunData(suite, runId) {
+            const response = await fetch('/api/compare-runs', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ suite, run_id: runId })
+            });
+            
+            const data = await response.json();
+            if (response.ok && data.success) {
+                return data;
+            } else {
+                throw new Error(data.error || 'Failed to fetch run data');
+            }
+        }
+        
+        // Merge Run Results: Combine Run 1 and Run 2 based on specific logic
+        async function mergeRunResults() {
+            const suite = document.getElementById('compareSuite').value.trim();
+            const runId1 = document.getElementById('runId1').value.trim();
+            const runId2 = document.getElementById('runId2').value.trim();
+            
+            const compareLoader = document.getElementById('compareLoader');
+            const compareMessage = document.getElementById('compareMessage');
+            
+            if (!suite || !runId1 || !runId2) {
+                compareMessage.innerHTML = 'Please fill in Suite, Run ID 1, and Run ID 2 to merge results';
+                compareMessage.className = 'message active error';
+                return;
+            }
+            
+            // Check for duplicate Run IDs
+            const duplicateError = validateNoDuplicateRunIds(runId1, runId2, null, null, null, null, null);
+            if (duplicateError) {
+                compareMessage.innerHTML = duplicateError;
+                compareMessage.className = 'message active error';
+                compareMessage.style.display = 'block';
+                return;
+            }
+            
+            compareLoader.classList.add('active');
+            compareMessage.style.display = 'none';
+            compareMessage.innerHTML = '';
+            compareMessage.className = 'message';
+            document.getElementById('comparisonResults').style.display = 'none';
+            
+            try {
+                // Fetch both runs
+                const [data1, data2] = await Promise.all([
+                    fetchRunData(suite, runId1),
+                    fetchRunData(suite, runId2)
+                ]);
+                
+                // Merge the results
+                const mergedData = mergeTestResults(data1, data2);
+                
+                // Display as a single run
+                displayComparison(mergedData, null, null);
+                document.getElementById('comparisonResults').style.display = 'block';
+                compareMessage.innerHTML = `Successfully merged results from Run ID 1 (${runId1}) and Run ID 2 (${runId2})!`;
+                compareMessage.className = 'message active success';
+                compareMessage.style.display = 'block';
+                
+                // Clear Valid Fail fields after merge
+                clearValidFailFields();
+            } catch (error) {
+                compareMessage.innerHTML = error.message;
+                compareMessage.className = 'message active error';
+                compareMessage.style.display = 'block';
+                document.getElementById('comparisonResults').style.display = 'none';
+            } finally {
+                compareLoader.classList.remove('active');
+            }
+        }
+        
+        // Merge test results from two runs based on specific logic
+        function mergeTestResults(data1, data2) {
+            // Create a map of all tests from both runs
+            const testMap = new Map();
+            
+            // Helper to check if status is failed
+            const isFailed = (status) => {
+                return ['Failed', 'failed', 'Error', 'error'].includes(status);
+            };
+            
+            // Helper to check if status is passed
+            const isPassed = (status) => {
+                return ['Passed', 'passed', 'Success', 'success'].includes(status);
+            };
+            
+            // Process tests from Run 1
+            (data1.all_tests || []).forEach(test => {
+                const key = test.test_case_id || test.test_name;
+                testMap.set(key, {
+                    ...test,
+                    run1Status: test.status,
+                    run2Status: null
+                });
+            });
+            
+            // Process tests from Run 2
+            (data2.all_tests || []).forEach(test => {
+                const key = test.test_case_id || test.test_name;
+                if (testMap.has(key)) {
+                    testMap.get(key).run2Status = test.status;
+                } else {
+                    testMap.set(key, {
+                        ...test,
+                        run1Status: null,
+                        run2Status: test.status
+                    });
+                }
+            });
+            
+            // Apply merge logic
+            const mergedTests = [];
+            testMap.forEach((test, key) => {
+                const status1 = test.run1Status;
+                const status2 = test.run2Status;
+                
+                let finalStatus;
+                
+                // If test passed in both runs → Pass
+                if (isPassed(status1) && isPassed(status2)) {
+                    finalStatus = 'Passed';
+                }
+                // If test failed in Run 1 but passed in Run 2 → Pass (take Run 2 result - rerun passed)
+                else if (isFailed(status1) && isPassed(status2)) {
+                    finalStatus = 'Passed';
+                }
+                // If test failed in both runs → Rerun Failed
+                else if (isFailed(status1) && isFailed(status2)) {
+                    finalStatus = 'Rerun Failed';
+                }
+                // If test passed in Run 1 but failed in Run 2 → Pass (take Run 1 result)
+                else if (isPassed(status1) && isFailed(status2)) {
+                    finalStatus = 'Passed';
+                }
+                // If only in Run 1
+                else if (status1 && !status2) {
+                    finalStatus = status1;
+                }
+                // If only in Run 2
+                else if (!status1 && status2) {
+                    finalStatus = status2;
+                }
+                // Default case
+                else {
+                    finalStatus = status1 || status2 || 'N/A';
+                }
+                
+                mergedTests.push({
+                    ...test,
+                    status: finalStatus
+                });
+            });
+            
+            // Count merged results
+            const totalTests = mergedTests.length;
+            const failedTests = mergedTests.filter(t => isFailed(t.status)).length;
+            const rerunFailedCount = mergedTests.filter(t => t.status === 'Rerun Failed').length;
+            
+            // Create merged data object
+            return {
+                ...data1,
+                run_name: `${data1.run_name} (Merged with ${data2.run_name})`,
+                run_id: runId1,
+                all_tests: mergedTests,
+                total_tests: totalTests,
+                rerun_failed_count: rerunFailedCount
+            };
+        }
+        
+        function displayComparison(data1, data2, data3, data4, data5, data6, data7) {
+            // Store comparison data globally for download
+            comparisonData = { data1, data2, data3, data4, data5, data6, data7 };
+            
+            // Count visible runs
+            const visibleRuns = [data1, data2, data3, data4, data5, data6, data7].filter(d => d !== null).length;
+            
+            // Apply compact layout if more than 3 runs
+            const comparisonGrid = document.querySelector('.comparison-grid');
+            const scrollHint = document.getElementById('scrollHint');
+            if (visibleRuns > 3) {
+                comparisonGrid.classList.add('compact');
+                // Only show scroll hint if more than 5 runs
+                if (scrollHint) scrollHint.style.display = visibleRuns > 5 ? 'block' : 'none';
+            } else {
+                comparisonGrid.classList.remove('compact');
+                if (scrollHint) scrollHint.style.display = 'none';
+            }
+            
+            // Count failed tests from all_tests array (including Rerun Failed)
+            const countFailed = (data) => {
+                if (!data || !data.all_tests) return 0;
+                return data.all_tests.filter(t => ['Failed', 'failed', 'Error', 'error', 'Rerun Failed'].includes(t.status)).length;
+            };
+            
+            // Count passed tests from all_tests array
+            const countPassed = (data) => {
+                if (!data || !data.all_tests) return 0;
+                return data.all_tests.filter(t => ['Passed', 'passed', 'Success', 'success'].includes(t.status)).length;
+            };
+            
+            // Format date for display
+            const formatDate = (dateStr) => {
+                if (!dateStr || dateStr === 'N/A') return '';
+                try {
+                    const date = new Date(dateStr);
+                    return date.toLocaleString('en-US', { 
+                        year: 'numeric', month: 'short', day: 'numeric',
+                        hour: '2-digit', minute: '2-digit'
+                    });
+                } catch(e) {
+                    return dateStr;
+                }
+            };
+            
+            // Format short date for table headers
+            const formatShortDate = (dateStr) => {
+                if (!dateStr || dateStr === 'N/A') return '';
+                try {
+                    const date = new Date(dateStr);
+                    return date.toLocaleDateString('en-US', { 
+                        month: 'short', day: 'numeric'
+                    });
+                } catch(e) {
+                    return '';
+                }
+            };
+            
+            // Calculate RTR (Pass Rate)
+            const calculateRtr = (data) => {
+                if (!data || !data.total_tests || data.total_tests === 0) return '0';
+                const failed = countFailed(data);
+                const passed = data.total_tests - failed;
+                const rtr = (passed / data.total_tests * 100).toFixed(1);
+                return rtr;
+            };
+            
+            // Update run names and dates
+            document.getElementById('run1Name').textContent = data1.run_name || 'Run 1';
+            document.getElementById('run1Date').textContent = formatDate(data1.run_date);
+            
+            // Update table headers with run name and short date
+            const shortDate1 = formatShortDate(data1.run_date);
+            document.getElementById('run1Header').innerHTML = `${data1.run_name || 'Run 1'}<br>${shortDate1}`;
+            
+            // Update summary stats for Run 1
+            document.getElementById('run1Total').textContent = data1.total_tests;
+            document.getElementById('run1Passed').textContent = countPassed(data1);
+            document.getElementById('run1Failed').textContent = countFailed(data1);
+            document.getElementById('run1ValidFailCount').textContent = '0';
+            document.getElementById('run1Rtr').textContent = calculateRtr(data1) + '%';
+            
+            // Show/hide Run 2 card and column based on whether data2 exists
+            const run2Card = document.querySelector('.comparison-card:nth-child(2)');
+            const run2Header = document.getElementById('run2Header');
+            
+            if (data2) {
+                document.getElementById('run2Name').textContent = data2.run_name || 'Run 2';
+                document.getElementById('run2Date').textContent = formatDate(data2.run_date);
+                const shortDate2 = formatShortDate(data2.run_date);
+                document.getElementById('run2Header').innerHTML = `${data2.run_name || 'Run 2'}<br>${shortDate2}`;
+                document.getElementById('run2Total').textContent = data2.total_tests;
+                document.getElementById('run2Passed').textContent = countPassed(data2);
+                document.getElementById('run2Failed').textContent = countFailed(data2);
+                document.getElementById('run2ValidFailCount').textContent = '0';
+                document.getElementById('run2Rtr').textContent = calculateRtr(data2) + '%';
+                run2Card.style.display = 'block';
+                run2Header.style.display = '';
+                document.getElementById('search_run2').parentElement.style.display = '';
+            } else {
+                run2Card.style.display = 'none';
+                run2Header.style.display = 'none';
+                document.getElementById('search_run2').parentElement.style.display = 'none';
+            }
+            
+            // Show/hide Run 3 card and column based on whether data3 exists
+            const run3Card = document.querySelector('.comparison-card:nth-child(3)');
+            const run3Header = document.getElementById('run3Header');
+            
+            if (data3) {
+                document.getElementById('run3Name').textContent = data3.run_name || 'Run 3';
+                document.getElementById('run3Date').textContent = formatDate(data3.run_date);
+                const shortDate3 = formatShortDate(data3.run_date);
+                document.getElementById('run3Header').innerHTML = `${data3.run_name || 'Run 3'}<br>${shortDate3}`;
+                document.getElementById('run3Total').textContent = data3.total_tests;
+                document.getElementById('run3Passed').textContent = countPassed(data3);
+                document.getElementById('run3Failed').textContent = countFailed(data3);
+                document.getElementById('run3ValidFailCount').textContent = '0';
+                document.getElementById('run3Rtr').textContent = calculateRtr(data3) + '%';
+                run3Card.style.display = 'block';
+                run3Header.style.display = '';
+                document.getElementById('search_run3').parentElement.style.display = '';
+            } else {
+                run3Card.style.display = 'none';
+                run3Header.style.display = 'none';
+                document.getElementById('search_run3').parentElement.style.display = 'none';
+            }
+            
+            // Show/hide Run 4 card and column based on whether data4 exists
+            const run4Card = document.querySelector('.comparison-card:nth-child(4)');
+            const run4Header = document.getElementById('run4Header');
+            
+            if (data4) {
+                document.getElementById('run4Name').textContent = data4.run_name || 'Run 4';
+                document.getElementById('run4Date').textContent = formatDate(data4.run_date);
+                const shortDate4 = formatShortDate(data4.run_date);
+                document.getElementById('run4Header').innerHTML = `${data4.run_name || 'Run 4'}<br>${shortDate4}`;
+                document.getElementById('run4Total').textContent = data4.total_tests;
+                document.getElementById('run4Passed').textContent = countPassed(data4);
+                document.getElementById('run4Failed').textContent = countFailed(data4);
+                document.getElementById('run4ValidFailCount').textContent = '0';
+                document.getElementById('run4Rtr').textContent = calculateRtr(data4) + '%';
+                run4Card.style.display = 'block';
+                run4Header.style.display = '';
+                document.getElementById('search_run4').parentElement.style.display = '';
+            } else {
+                run4Card.style.display = 'none';
+                run4Header.style.display = 'none';
+                document.getElementById('search_run4').parentElement.style.display = 'none';
+            }
+            
+            // Show/hide Run 5 card and column based on whether data5 exists
+            const run5Card = document.querySelector('.comparison-card:nth-child(5)');
+            const run5Header = document.getElementById('run5Header');
+            
+            if (data5) {
+                document.getElementById('run5Name').textContent = data5.run_name || 'Run 5';
+                document.getElementById('run5Date').textContent = formatDate(data5.run_date);
+                const shortDate5 = formatShortDate(data5.run_date);
+                document.getElementById('run5Header').innerHTML = `${data5.run_name || 'Run 5'}<br>${shortDate5}`;
+                document.getElementById('run5Total').textContent = data5.total_tests;
+                document.getElementById('run5Passed').textContent = countPassed(data5);
+                document.getElementById('run5Failed').textContent = countFailed(data5);
+                document.getElementById('run5ValidFailCount').textContent = '0';
+                document.getElementById('run5Rtr').textContent = calculateRtr(data5) + '%';
+                run5Card.style.display = 'block';
+                run5Header.style.display = '';
+                document.getElementById('search_run5').parentElement.style.display = '';
+            } else {
+                run5Card.style.display = 'none';
+                run5Header.style.display = 'none';
+                document.getElementById('search_run5').parentElement.style.display = 'none';
+            }
+            
+            // Show/hide Run 6 card and column based on whether data6 exists
+            const run6Card = document.querySelector('.comparison-card:nth-child(6)');
+            const run6Header = document.getElementById('run6Header');
+            
+            if (data6) {
+                document.getElementById('run6Name').textContent = data6.run_name || 'Run 6';
+                document.getElementById('run6Date').textContent = formatDate(data6.run_date);
+                const shortDate6 = formatShortDate(data6.run_date);
+                document.getElementById('run6Header').innerHTML = `${data6.run_name || 'Run 6'}<br>${shortDate6}`;
+                document.getElementById('run6Total').textContent = data6.total_tests;
+                document.getElementById('run6Passed').textContent = countPassed(data6);
+                document.getElementById('run6Failed').textContent = countFailed(data6);
+                document.getElementById('run6ValidFailCount').textContent = '0';
+                document.getElementById('run6Rtr').textContent = calculateRtr(data6) + '%';
+                run6Card.style.display = 'block';
+                run6Header.style.display = '';
+                document.getElementById('search_run6').parentElement.style.display = '';
+            } else {
+                run6Card.style.display = 'none';
+                run6Header.style.display = 'none';
+                document.getElementById('search_run6').parentElement.style.display = 'none';
+            }
+            
+            // Show/hide Run 7 card and column based on whether data7 exists
+            const run7Card = document.querySelector('.comparison-card:nth-child(7)');
+            const run7Header = document.getElementById('run7Header');
+            
+            if (data7) {
+                document.getElementById('run7Name').textContent = data7.run_name || 'Run 7';
+                document.getElementById('run7Date').textContent = formatDate(data7.run_date);
+                const shortDate7 = formatShortDate(data7.run_date);
+                document.getElementById('run7Header').innerHTML = `${data7.run_name || 'Run 7'}<br>${shortDate7}`;
+                document.getElementById('run7Total').textContent = data7.total_tests;
+                document.getElementById('run7Passed').textContent = countPassed(data7);
+                document.getElementById('run7Failed').textContent = countFailed(data7);
+                document.getElementById('run7ValidFailCount').textContent = '0';
+                document.getElementById('run7Rtr').textContent = calculateRtr(data7) + '%';
+                run7Card.style.display = 'block';
+                run7Header.style.display = '';
+                document.getElementById('search_run7').parentElement.style.display = '';
+            } else {
+                run7Card.style.display = 'none';
+                run7Header.style.display = 'none';
+                document.getElementById('search_run7').parentElement.style.display = 'none';
+            }
+            
+            // Create a map of all unique test cases
+            const allTests = new Map();
+            
+            // Function to extract Test Case ID (C followed by numbers) from test name
+            const extractTestCaseId = (testName) => {
+                if (!testName) return 'N/A';
+                const match = testName.match(/C\d+/);
+                return match ? match[0] : 'N/A';
+            };
+            
+            const addTests = (testCases, runNum) => {
+                (testCases || []).forEach(test => {
+                    const id = test.test_case_id || test.test_name;
+                    const testCaseId = extractTestCaseId(test.test_name);
+                    if (!allTests.has(id)) {
+                        allTests.set(id, {
+                            id,
+                            testCaseId,
+                            name: test.test_name,
+                            run1: 'N/A',
+                            run2: 'N/A',
+                            run3: 'N/A',
+                            run4: 'N/A',
+                            run5: 'N/A',
+                            run6: 'N/A',
+                            run7: 'N/A'
+                        });
+                    }
+                    allTests.get(id)[`run${runNum}`] = test.status;
+                });
+            };
+            
+            // Extract all tests (not just failures)
+            const allTests1 = (data1.all_tests) ? data1.all_tests : [];
+            const allTests2 = (data2 && data2.all_tests) ? data2.all_tests : [];
+            const allTests3 = (data3 && data3.all_tests) ? data3.all_tests : [];
+            const allTests4 = (data4 && data4.all_tests) ? data4.all_tests : [];
+            const allTests5 = (data5 && data5.all_tests) ? data5.all_tests : [];
+            const allTests6 = (data6 && data6.all_tests) ? data6.all_tests : [];
+            const allTests7 = (data7 && data7.all_tests) ? data7.all_tests : [];
+            
+            addTests(allTests1, 1);
+            if (data2) {
+                addTests(allTests2, 2);
+            }
+            if (data3) {
+                addTests(allTests3, 3);
+            }
+            if (data4) {
+                addTests(allTests4, 4);
+            }
+            if (data5) {
+                addTests(allTests5, 5);
+            }
+            if (data6) {
+                addTests(allTests6, 6);
+            }
+            if (data7) {
+                addTests(allTests7, 7);
+            }
+            
+            // Display in table
+            const tbody = document.getElementById('comparisonBody');
+            tbody.innerHTML = '';
+            
+            // Helper to get status class
+            const getStatusClass = (status) => {
+                if (!status || status === 'N/A') return 'n/a';
+                if (status === 'Rerun Failed') return 'rerun';
+                return status.toLowerCase().replace(/\s+/g, '-');
+            };
+            
+            allTests.forEach(test => {
+                const row = document.createElement('tr');
+                const run2Cell = data2 ? `<td><span class="status-badge status-${getStatusClass(test.run2)}">${test.run2}</span></td>` : '<td style="display: none;"></td>';
+                const run3Cell = data3 ? `<td><span class="status-badge status-${getStatusClass(test.run3)}">${test.run3}</span></td>` : '<td style="display: none;"></td>';
+                const run4Cell = data4 ? `<td><span class="status-badge status-${getStatusClass(test.run4)}">${test.run4}</span></td>` : '<td style="display: none;"></td>';
+                const run5Cell = data5 ? `<td><span class="status-badge status-${getStatusClass(test.run5)}">${test.run5}</span></td>` : '<td style="display: none;"></td>';
+                const run6Cell = data6 ? `<td><span class="status-badge status-${getStatusClass(test.run6)}">${test.run6}</span></td>` : '<td style="display: none;"></td>';
+                const run7Cell = data7 ? `<td><span class="status-badge status-${getStatusClass(test.run7)}">${test.run7}</span></td>` : '<td style="display: none;"></td>';
+                row.innerHTML = `
+                    <td>${test.testCaseId}</td>
+                    <td>${test.name}</td>
+                    <td><span class="status-badge status-${getStatusClass(test.run1)}">${test.run1}</span></td>
+                    ${run2Cell}
+                    ${run3Cell}
+                    ${run4Cell}
+                    ${run5Cell}
+                    ${run6Cell}
+                    ${run7Cell}
+                `;
+                tbody.appendChild(row);
+            });
+        }
+        
+        // Update Recalculate RTR button state
+        function updateRecalculateButton() {
+            const validFail1 = document.getElementById('run1ValidFail').value.trim();
+            const validFail2 = document.getElementById('run2ValidFail').value.trim();
+            const validFail3 = document.getElementById('run3ValidFail').value.trim();
+            const validFail4 = document.getElementById('run4ValidFail').value.trim();
+            const validFail5 = document.getElementById('run5ValidFail').value.trim();
+            const validFail6 = document.getElementById('run6ValidFail').value.trim();
+            const validFail7 = document.getElementById('run7ValidFail').value.trim();
+            
+            const recalculateBtn = document.getElementById('recalculateRtrBtn');
+            
+            // Enable button if any valid fail field has a value
+            if (validFail1 || validFail2 || validFail3 || validFail4 || validFail5 || validFail6 || validFail7) {
+                recalculateBtn.disabled = false;
+                recalculateBtn.style.opacity = '1';
+                recalculateBtn.style.cursor = 'pointer';
+            } else {
+                recalculateBtn.disabled = true;
+                recalculateBtn.style.opacity = '0.5';
+                recalculateBtn.style.cursor = 'not-allowed';
+            }
+        }
+        
+        // Recalculate RTR with Valid Fail values
+        function recalculateRtr() {
+            // Get valid fail values (default to 0 if empty)
+            const validFail1 = parseInt(document.getElementById('run1ValidFail').value) || 0;
+            const validFail2 = parseInt(document.getElementById('run2ValidFail').value) || 0;
+            const validFail3 = parseInt(document.getElementById('run3ValidFail').value) || 0;
+            const validFail4 = parseInt(document.getElementById('run4ValidFail').value) || 0;
+            const validFail5 = parseInt(document.getElementById('run5ValidFail').value) || 0;
+            const validFail6 = parseInt(document.getElementById('run6ValidFail').value) || 0;
+            const validFail7 = parseInt(document.getElementById('run7ValidFail').value) || 0;
+            
+            // Recalculate RTR for Run 1
+            const total1 = parseInt(document.getElementById('run1Total').textContent) || 0;
+            const failed1 = parseInt(document.getElementById('run1Failed').textContent) || 0;
+            if (total1 > 0) {
+                const passed1 = total1 - failed1;
+                const rtr1 = ((passed1 + validFail1) / total1 * 100).toFixed(1);
+                document.getElementById('run1Rtr').textContent = rtr1 + '%';
+                document.getElementById('run1ValidFailCount').textContent = validFail1;
+            }
+            
+            // Recalculate RTR for Run 2 (if visible)
+            const run2Card = document.querySelector('.comparison-card:nth-child(2)');
+            if (run2Card.style.display !== 'none') {
+                const total2 = parseInt(document.getElementById('run2Total').textContent) || 0;
+                const failed2 = parseInt(document.getElementById('run2Failed').textContent) || 0;
+                if (total2 > 0) {
+                    const passed2 = total2 - failed2;
+                    const rtr2 = ((passed2 + validFail2) / total2 * 100).toFixed(1);
+                    document.getElementById('run2Rtr').textContent = rtr2 + '%';
+                    document.getElementById('run2ValidFailCount').textContent = validFail2;
+                }
+            }
+            
+            // Recalculate RTR for Run 3 (if visible)
+            const run3Card = document.querySelector('.comparison-card:nth-child(3)');
+            if (run3Card.style.display !== 'none') {
+                const total3 = parseInt(document.getElementById('run3Total').textContent) || 0;
+                const failed3 = parseInt(document.getElementById('run3Failed').textContent) || 0;
+                if (total3 > 0) {
+                    const passed3 = total3 - failed3;
+                    const rtr3 = ((passed3 + validFail3) / total3 * 100).toFixed(1);
+                    document.getElementById('run3Rtr').textContent = rtr3 + '%';
+                    document.getElementById('run3ValidFailCount').textContent = validFail3;
+                }
+            }
+            
+            // Recalculate RTR for Run 4 (if visible)
+            const run4Card = document.querySelector('.comparison-card:nth-child(4)');
+            if (run4Card.style.display !== 'none') {
+                const total4 = parseInt(document.getElementById('run4Total').textContent) || 0;
+                const failed4 = parseInt(document.getElementById('run4Failed').textContent) || 0;
+                if (total4 > 0) {
+                    const passed4 = total4 - failed4;
+                    const rtr4 = ((passed4 + validFail4) / total4 * 100).toFixed(1);
+                    document.getElementById('run4Rtr').textContent = rtr4 + '%';
+                    document.getElementById('run4ValidFailCount').textContent = validFail4;
+                }
+            }
+            
+            // Recalculate RTR for Run 5 (if visible)
+            const run5Card = document.querySelector('.comparison-card:nth-child(5)');
+            if (run5Card.style.display !== 'none') {
+                const total5 = parseInt(document.getElementById('run5Total').textContent) || 0;
+                const failed5 = parseInt(document.getElementById('run5Failed').textContent) || 0;
+                if (total5 > 0) {
+                    const passed5 = total5 - failed5;
+                    const rtr5 = ((passed5 + validFail5) / total5 * 100).toFixed(1);
+                    document.getElementById('run5Rtr').textContent = rtr5 + '%';
+                    document.getElementById('run5ValidFailCount').textContent = validFail5;
+                }
+            }
+            
+            // Recalculate RTR for Run 6 (if visible)
+            const run6Card = document.querySelector('.comparison-card:nth-child(6)');
+            if (run6Card.style.display !== 'none') {
+                const total6 = parseInt(document.getElementById('run6Total').textContent) || 0;
+                const failed6 = parseInt(document.getElementById('run6Failed').textContent) || 0;
+                if (total6 > 0) {
+                    const passed6 = total6 - failed6;
+                    const rtr6 = ((passed6 + validFail6) / total6 * 100).toFixed(1);
+                    document.getElementById('run6Rtr').textContent = rtr6 + '%';
+                    document.getElementById('run6ValidFailCount').textContent = validFail6;
+                }
+            }
+            
+            // Recalculate RTR for Run 7 (if visible)
+            const run7Card = document.querySelector('.comparison-card:nth-child(7)');
+            if (run7Card.style.display !== 'none') {
+                const total7 = parseInt(document.getElementById('run7Total').textContent) || 0;
+                const failed7 = parseInt(document.getElementById('run7Failed').textContent) || 0;
+                if (total7 > 0) {
+                    const passed7 = total7 - failed7;
+                    const rtr7 = ((passed7 + validFail7) / total7 * 100).toFixed(1);
+                    document.getElementById('run7Rtr').textContent = rtr7 + '%';
+                    document.getElementById('run7ValidFailCount').textContent = validFail7;
+                }
+            }
+            
+            // Clear only numeric Valid Fail input fields after recalculation (keep test case IDs)
+            document.getElementById('run1ValidFail').value = '';
+            document.getElementById('run2ValidFail').value = '';
+            document.getElementById('run3ValidFail').value = '';
+            document.getElementById('run4ValidFail').value = '';
+            document.getElementById('run5ValidFail').value = '';
+            document.getElementById('run6ValidFail').value = '';
+            document.getElementById('run7ValidFail').value = '';
+            updateRecalculateButton();
+        }
+        
+        // Toggle Valid Fail button based on input
+        function toggleValidFailButton() {
+            const input = document.getElementById('validFailTestCaseIds').value.trim();
+            const button = document.getElementById('updateValidFailBtn');
+            
+            if (input) {
+                button.disabled = false;
+                button.style.opacity = '1';
+                button.style.cursor = 'pointer';
+            } else {
+                button.disabled = true;
+                button.style.opacity = '0.5';
+                button.style.cursor = 'not-allowed';
+            }
+        }
+        
+        // Clear Valid Fail fields
+        function clearValidFailFields() {
+            document.getElementById('validFailTestCaseIds').value = '';
+            document.getElementById('validFailMessage').innerHTML = '';
+            toggleValidFailButton();
+            
+            // Also clear the Valid Fail input fields for all runs
+            document.getElementById('run1ValidFail').value = '';
+            document.getElementById('run2ValidFail').value = '';
+            document.getElementById('run3ValidFail').value = '';
+            document.getElementById('run4ValidFail').value = '';
+            document.getElementById('run5ValidFail').value = '';
+            document.getElementById('run6ValidFail').value = '';
+            document.getElementById('run7ValidFail').value = '';
+            updateRecalculateButton();
+        }
+        
+        // Update Valid Fail Status for specified Test Case IDs
+        function updateValidFailStatus() {
+            const input = document.getElementById('validFailTestCaseIds').value.trim();
+            const messageDiv = document.getElementById('validFailMessage');
+            
+            if (!input) {
+                messageDiv.innerHTML = '<span style="color: #dc3545;">⚠️ Please enter test case IDs</span>';
+                return;
+            }
+            
+            // Parse comma-separated IDs
+            const testCaseIds = input.split(',').map(id => id.trim()).filter(id => id);
+            
+            if (testCaseIds.length === 0) {
+                messageDiv.innerHTML = '<span style="color: #dc3545;">⚠️ No valid test case IDs found</span>';
+                return;
+            }
+            
+            // Get all table rows
+            const tableBody = document.getElementById('comparisonBody');
+            const rows = tableBody.querySelectorAll('tr');
+            
+            let updatedCount = 0;
+            let notFoundIds = [];
+            
+            testCaseIds.forEach(testCaseId => {
+                let found = false;
+                
+                rows.forEach(row => {
+                    const idCell = row.querySelector('td:first-child');
+                    if (idCell && idCell.textContent.trim() === testCaseId) {
+                        found = true;
+                        
+                        // Update all status cells (columns 3, 4, 5)
+                        const statusCells = row.querySelectorAll('td:nth-child(n+3)');
+                        statusCells.forEach(cell => {
+                            const badge = cell.querySelector('.status-badge');
+                            if (badge) {
+                                const currentStatus = badge.textContent.trim();
+                                // Only update if currently Failed or Rerun Failed
+                                if (currentStatus === 'Failed' || currentStatus === 'Rerun Failed') {
+                                    // Store original status as data attribute
+                                    badge.setAttribute('data-original-status', currentStatus);
+                                    badge.textContent = 'Valid Fail';
+                                    badge.style.background = '#ffc107';
+                                    badge.style.color = '#000';
+                                    updatedCount++;
+                                }
+                            }
+                        });
+                    }
+                });
+                
+                if (!found) {
+                    notFoundIds.push(testCaseId);
+                }
+            });
+            
+            // Display result message
+            let resultMessage = '';
+            if (updatedCount > 0) {
+                resultMessage = `<span style="color: #28a745;">✓ Updated ${updatedCount} test case(s) to Valid Fail</span>`;
+            }
+            if (notFoundIds.length > 0) {
+                if (resultMessage) resultMessage += '<br>';
+                resultMessage += `<span style="color: #ff9800;">⚠️ Test case IDs not found: ${notFoundIds.join(', ')}</span>`;
+            }
+            if (updatedCount === 0 && notFoundIds.length === 0) {
+                resultMessage = '<span style="color: #6c757d;">ℹ️ No Failed test cases found with the specified IDs</span>';
+            }
+            
+            messageDiv.innerHTML = resultMessage;
+        }
+        
+        // Reset Valid Fail Status back to original Failed/Rerun Failed
+        function resetValidFailStatus() {
+            const messageDiv = document.getElementById('validFailMessage');
+            
+            // Get all table rows
+            const tableBody = document.getElementById('comparisonBody');
+            const rows = tableBody.querySelectorAll('tr');
+            
+            let resetCount = 0;
+            
+            rows.forEach(row => {
+                // Check all status cells (columns 3, 4, 5)
+                const statusCells = row.querySelectorAll('td:nth-child(n+3)');
+                statusCells.forEach(cell => {
+                    const badge = cell.querySelector('.status-badge');
+                    if (badge) {
+                        const currentStatus = badge.textContent.trim();
+                        const originalStatus = badge.getAttribute('data-original-status');
+                        
+                        // Only reset if currently Valid Fail and has original status stored
+                        if (currentStatus === 'Valid Fail' && originalStatus) {
+                            badge.textContent = originalStatus;
+                            
+                            // Restore original styling
+                            if (originalStatus === 'Failed') {
+                                badge.style.background = '#ffebee';
+                                badge.style.color = '#c62828';
+                            } else if (originalStatus === 'Rerun Failed') {
+                                badge.style.background = '#fce4ec';
+                                badge.style.color = '#880e4f';
+                            }
+                            
+                            // Remove the data attribute
+                            badge.removeAttribute('data-original-status');
+                            resetCount++;
+                        }
+                    }
+                });
+            });
+            
+            // Display result message
+            if (resetCount > 0) {
+                messageDiv.innerHTML = `<span style="color: #28a745;">✓ Reset ${resetCount} test case(s) back to original status</span>`;
+            } else {
+                messageDiv.innerHTML = '<span style="color: #6c757d;">ℹ️ No Valid Fail test cases found to reset</span>';
+            }
+        }
+        
+        // Download Summary Report
+        async function downloadSummaryReport() {
+            if (!comparisonData) {
+                alert('No comparison data available. Please run a comparison first.');
+                return;
+            }
+            
+            const { data1, data2, data3, data4, data5, data6, data7 } = comparisonData;
+            const suite = document.getElementById('compareSuite').value.trim();
+            
+            // Gather summary data
+            const summary = {
+                suite: suite,
+                runs: []
+            };
+            
+            // Add Run 1 data
+            if (data1) {
+                summary.runs.push({
+                    run_id: document.getElementById('runId1').value.trim(),
+                    run_name: data1.run_name || 'Run 1',
+                    run_date: data1.run_date || 'N/A',
+                    total_tests: data1.total_tests || 0,
+                    failed_tests: parseInt(document.getElementById('run1Failed').textContent) || 0,
+                    rtr: document.getElementById('run1Rtr').textContent,
+                    valid_fail: parseInt(document.getElementById('run1ValidFail').value) || 0
+                });
+            }
+            
+            // Add Run 2 data (if exists)
+            const run2Card = document.querySelector('.comparison-card:nth-child(2)');
+            if (data2 && run2Card.style.display !== 'none') {
+                summary.runs.push({
+                    run_id: document.getElementById('runId2').value.trim(),
+                    run_name: data2.run_name || 'Run 2',
+                    run_date: data2.run_date || 'N/A',
+                    total_tests: data2.total_tests || 0,
+                    failed_tests: parseInt(document.getElementById('run2Failed').textContent) || 0,
+                    rtr: document.getElementById('run2Rtr').textContent,
+                    valid_fail: parseInt(document.getElementById('run2ValidFail').value) || 0
+                });
+            }
+            
+            // Add Run 3 data (if exists)
+            const run3Card = document.querySelector('.comparison-card:nth-child(3)');
+            if (data3 && run3Card.style.display !== 'none') {
+                summary.runs.push({
+                    run_id: document.getElementById('runId3').value.trim(),
+                    run_name: data3.run_name || 'Run 3',
+                    run_date: data3.run_date || 'N/A',
+                    total_tests: data3.total_tests || 0,
+                    failed_tests: parseInt(document.getElementById('run3Failed').textContent) || 0,
+                    rtr: document.getElementById('run3Rtr').textContent,
+                    valid_fail: parseInt(document.getElementById('run3ValidFail').value) || 0
+                });
+            }
+            
+            // Add Run 4 data (if exists)
+            const run4Card = document.querySelector('.comparison-card:nth-child(4)');
+            if (data4 && run4Card.style.display !== 'none') {
+                summary.runs.push({
+                    run_id: document.getElementById('runId4').value.trim(),
+                    run_name: data4.run_name || 'Run 4',
+                    run_date: data4.run_date || 'N/A',
+                    total_tests: data4.total_tests || 0,
+                    failed_tests: parseInt(document.getElementById('run4Failed').textContent) || 0,
+                    rtr: document.getElementById('run4Rtr').textContent,
+                    valid_fail: parseInt(document.getElementById('run4ValidFail').value) || 0
+                });
+            }
+            
+            // Add Run 5 data (if exists)
+            const run5Card = document.querySelector('.comparison-card:nth-child(5)');
+            if (data5 && run5Card.style.display !== 'none') {
+                summary.runs.push({
+                    run_id: document.getElementById('runId5').value.trim(),
+                    run_name: data5.run_name || 'Run 5',
+                    run_date: data5.run_date || 'N/A',
+                    total_tests: data5.total_tests || 0,
+                    failed_tests: parseInt(document.getElementById('run5Failed').textContent) || 0,
+                    rtr: document.getElementById('run5Rtr').textContent,
+                    valid_fail: parseInt(document.getElementById('run5ValidFail').value) || 0
+                });
+            }
+            
+            // Add Run 6 data (if exists)
+            const run6Card = document.querySelector('.comparison-card:nth-child(6)');
+            if (data6 && run6Card.style.display !== 'none') {
+                summary.runs.push({
+                    run_id: document.getElementById('runId6').value.trim(),
+                    run_name: data6.run_name || 'Run 6',
+                    run_date: data6.run_date || 'N/A',
+                    total_tests: data6.total_tests || 0,
+                    failed_tests: parseInt(document.getElementById('run6Failed').textContent) || 0,
+                    rtr: document.getElementById('run6Rtr').textContent,
+                    valid_fail: parseInt(document.getElementById('run6ValidFail').value) || 0
+                });
+            }
+            
+            // Add Run 7 data (if exists)
+            const run7Card = document.querySelector('.comparison-card:nth-child(7)');
+            if (data7 && run7Card.style.display !== 'none') {
+                summary.runs.push({
+                    run_id: document.getElementById('runId7').value.trim(),
+                    run_name: data7.run_name || 'Run 7',
+                    run_date: data7.run_date || 'N/A',
+                    total_tests: data7.total_tests || 0,
+                    failed_tests: parseInt(document.getElementById('run7Failed').textContent) || 0,
+                    rtr: document.getElementById('run7Rtr').textContent,
+                    valid_fail: parseInt(document.getElementById('run7ValidFail').value) || 0
+                });
+            }
+            
+            // Gather detailed test data from table
+            const detailedTests = [];
+            const tableBody = document.getElementById('comparisonBody');
+            const rows = tableBody.querySelectorAll('tr');
+            
+            rows.forEach(row => {
+                const cells = row.querySelectorAll('td');
+                if (cells.length >= 3) {
+                    const testData = {
+                        test_case_id: cells[0].textContent.trim(),
+                        test_name: cells[1].textContent.trim(),
+                        run1_status: cells[2].textContent.trim()
+                    };
+                    
+                    if (cells.length >= 4 && cells[3].style.display !== 'none') {
+                        testData.run2_status = cells[3].textContent.trim();
+                    }
+                    
+                    if (cells.length >= 5 && cells[4].style.display !== 'none') {
+                        testData.run3_status = cells[4].textContent.trim();
+                    }
+                    
+                    if (cells.length >= 6 && cells[5].style.display !== 'none') {
+                        testData.run4_status = cells[5].textContent.trim();
+                    }
+                    
+                    if (cells.length >= 7 && cells[6].style.display !== 'none') {
+                        testData.run5_status = cells[6].textContent.trim();
+                    }
+                    
+                    if (cells.length >= 8 && cells[7].style.display !== 'none') {
+                        testData.run6_status = cells[7].textContent.trim();
+                    }
+                    
+                    if (cells.length >= 9 && cells[8].style.display !== 'none') {
+                        testData.run7_status = cells[8].textContent.trim();
+                    }
+                    
+                    detailedTests.push(testData);
+                }
+            });
+            
+            // Send to backend for Excel generation
+            try {
+                const response = await fetch('/api/download-summary-report', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        summary: summary,
+                        detailed_tests: detailedTests
+                    })
+                });
+                
+                if (response.ok) {
+                    const blob = await response.blob();
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `Summary_Report_${suite}_${new Date().toISOString().split('T')[0]}.xlsx`;
+                    document.body.appendChild(a);
+                    a.click();
+                    window.URL.revokeObjectURL(url);
+                    document.body.removeChild(a);
+                } else {
+                    const error = await response.json();
+                    alert('Error generating report: ' + (error.error || 'Unknown error'));
+                }
+            } catch (error) {
+                alert('Error downloading report: ' + error.message);
+            }
+        }
+
+        // Page 3: Cumulative RTR Calculator
+        function calculateCumulativeRTR() {
+            // Get raw input values to check if fields are empty vs having a value
+            const tr_total_val = document.getElementById('tr_total').value;
+            const tr_passed_val = document.getElementById('tr_passed').value;
+            const tr_validFail_val = document.getElementById('tr_validFail').value;
+            
+            const pom_total_val = document.getElementById('pom_total').value;
+            const pom_passed_val = document.getElementById('pom_passed').value;
+            const pom_validFail_val = document.getElementById('pom_validFail').value;
+            
+            const jmeter_total_val = document.getElementById('jmeter_total').value;
+            const jmeter_passed_val = document.getElementById('jmeter_passed').value;
+            const jmeter_validFail_val = document.getElementById('jmeter_validFail').value;
+            
+            // Check if passed field has a value (not blank) - includes 0
+            const tr_passed_provided = tr_passed_val !== '';
+            const pom_passed_provided = pom_passed_val !== '';
+            const jmeter_passed_provided = jmeter_passed_val !== '';
+            
+            // Parse values
+            const tr_total = parseInt(tr_total_val) || 0;
+            const tr_passed = parseInt(tr_passed_val) || 0;
+            const tr_validFail = parseInt(tr_validFail_val) || 0;
+            
+            const pom_total = parseInt(pom_total_val) || 0;
+            const pom_passed = parseInt(pom_passed_val) || 0;
+            const pom_validFail = parseInt(pom_validFail_val) || 0;
+            
+            const jmeter_total = parseInt(jmeter_total_val) || 0;
+            const jmeter_passed = parseInt(jmeter_passed_val) || 0;
+            const jmeter_validFail = parseInt(jmeter_validFail_val) || 0;
+            
+            // Calculate individual RTRs and Failed counts
+            const tr_failed = tr_total - tr_passed - tr_validFail;
+            const tr_rtr = tr_total > 0 ? ((tr_passed + tr_validFail) / tr_total * 100).toFixed(2) : 0;
+            
+            const pom_failed = pom_total - pom_passed - pom_validFail;
+            const pom_rtr = pom_total > 0 ? ((pom_passed + pom_validFail) / pom_total * 100).toFixed(2) : 0;
+            
+            const jmeter_failed = jmeter_total - jmeter_passed - jmeter_validFail;
+            const jmeter_rtr = jmeter_total > 0 ? ((jmeter_passed + jmeter_validFail) / jmeter_total * 100).toFixed(2) : 0;
+            
+            // Update Test Rigor results - show if total > 0 AND passed is provided (even if 0)
+            if (tr_total > 0 && tr_passed_provided) {
+                document.getElementById('tr_result').style.display = 'block';
+                document.getElementById('tr_rtr').textContent = tr_rtr + '%';
+                document.getElementById('tr_failed').textContent = Math.max(0, tr_failed);
+            } else {
+                document.getElementById('tr_result').style.display = 'none';
+            }
+            
+            // Update POM results - show if total > 0 AND passed is provided (even if 0)
+            if (pom_total > 0 && pom_passed_provided) {
+                document.getElementById('pom_result').style.display = 'block';
+                document.getElementById('pom_rtr').textContent = pom_rtr + '%';
+                document.getElementById('pom_failed').textContent = Math.max(0, pom_failed);
+            } else {
+                document.getElementById('pom_result').style.display = 'none';
+            }
+            
+            // Update JMeter results - show if total > 0 AND passed is provided (even if 0)
+            if (jmeter_total > 0 && jmeter_passed_provided) {
+                document.getElementById('jmeter_result').style.display = 'block';
+                document.getElementById('jmeter_rtr').textContent = jmeter_rtr + '%';
+                document.getElementById('jmeter_failed').textContent = Math.max(0, jmeter_failed);
+            } else {
+                document.getElementById('jmeter_result').style.display = 'none';
+            }
+            
+            // Calculate overall cumulative results - only include cards where passed is provided
+            let overall_total = 0;
+            let overall_passed = 0;
+            let overall_validFail = 0;
+            
+            if (tr_passed_provided) {
+                overall_total += tr_total;
+                overall_passed += tr_passed;
+                overall_validFail += tr_validFail;
+            }
+            if (pom_passed_provided) {
+                overall_total += pom_total;
+                overall_passed += pom_passed;
+                overall_validFail += pom_validFail;
+            }
+            if (jmeter_passed_provided) {
+                overall_total += jmeter_total;
+                overall_passed += jmeter_passed;
+                overall_validFail += jmeter_validFail;
+            }
+            
+            const overall_failed = Math.max(0, overall_total - overall_passed - overall_validFail);
+            const overall_rtr = overall_total > 0 ? ((overall_passed + overall_validFail) / overall_total * 100).toFixed(2) : 0;
+            
+            // Update overall results - only show if at least one passed count is provided
+            if (overall_total > 0 && (tr_passed_provided || pom_passed_provided || jmeter_passed_provided)) {
+                document.getElementById('cumulativeResults').style.display = 'block';
+                document.getElementById('overall_total').textContent = overall_total;
+                document.getElementById('overall_rtr').textContent = overall_rtr + '%';
+                document.getElementById('overall_failed').textContent = overall_failed;
+            } else {
+                document.getElementById('cumulativeResults').style.display = 'none';
+            }
+        }
+        
+        // Column-specific search functionality for detailed summary table
+        function searchTableColumns() {
+            const tbody = document.getElementById('comparisonBody');
+            const rows = tbody.getElementsByTagName('tr');
+            
+            // Get all search input values
+            const searchTestCaseId = document.getElementById('search_testCaseId').value.toLowerCase();
+            const searchTestName = document.getElementById('search_testName').value.toLowerCase();
+            const searchRun1 = document.getElementById('search_run1').value.toLowerCase();
+            const searchRun2 = document.getElementById('search_run2').value.toLowerCase();
+            const searchRun3 = document.getElementById('search_run3').value.toLowerCase();
+            const searchRun4 = document.getElementById('search_run4').value.toLowerCase();
+            const searchRun5 = document.getElementById('search_run5').value.toLowerCase();
+            const searchRun6 = document.getElementById('search_run6').value.toLowerCase();
+            const searchRun7 = document.getElementById('search_run7').value.toLowerCase();
+            
+            // Loop through all rows
+            for (let i = 0; i < rows.length; i++) {
+                const row = rows[i];
+                const cells = row.getElementsByTagName('td');
+                
+                if (cells.length >= 2) {
+                    let showRow = true;
+                    
+                    // Check Test Case ID (column 0)
+                    if (searchTestCaseId && !cells[0].textContent.toLowerCase().includes(searchTestCaseId)) {
+                        showRow = false;
+                    }
+                    
+                    // Check Test Name (column 1)
+                    if (searchTestName && !cells[1].textContent.toLowerCase().includes(searchTestName)) {
+                        showRow = false;
+                    }
+                    
+                    // Check Run 1 Status (column 2)
+                    if (searchRun1 && cells.length > 2 && cells[2].style.display !== 'none' && !cells[2].textContent.toLowerCase().includes(searchRun1)) {
+                        showRow = false;
+                    }
+                    
+                    // Check Run 2 Status (column 3)
+                    if (searchRun2 && cells.length > 3 && cells[3].style.display !== 'none' && !cells[3].textContent.toLowerCase().includes(searchRun2)) {
+                        showRow = false;
+                    }
+                    
+                    // Check Run 3 Status (column 4)
+                    if (searchRun3 && cells.length > 4 && cells[4].style.display !== 'none' && !cells[4].textContent.toLowerCase().includes(searchRun3)) {
+                        showRow = false;
+                    }
+                    
+                    // Check Run 4 Status (column 5)
+                    if (searchRun4 && cells.length > 5 && cells[5].style.display !== 'none' && !cells[5].textContent.toLowerCase().includes(searchRun4)) {
+                        showRow = false;
+                    }
+                    
+                    // Check Run 5 Status (column 6)
+                    if (searchRun5 && cells.length > 6 && cells[6].style.display !== 'none' && !cells[6].textContent.toLowerCase().includes(searchRun5)) {
+                        showRow = false;
+                    }
+                    
+                    // Check Run 6 Status (column 7)
+                    if (searchRun6 && cells.length > 7 && cells[7].style.display !== 'none' && !cells[7].textContent.toLowerCase().includes(searchRun6)) {
+                        showRow = false;
+                    }
+                    
+                    // Check Run 7 Status (column 8)
+                    if (searchRun7 && cells.length > 8 && cells[8].style.display !== 'none' && !cells[8].textContent.toLowerCase().includes(searchRun7)) {
+                        showRow = false;
+                    }
+                    
+                    // Show or hide the row based on all filters
+                    row.style.display = showRow ? '' : 'none';
+                }
+            }
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,767 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Rigor Failure Report Generator</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            padding: 40px;
+            max-width: 600px;
+            width: 100%;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .header h1 {
+            color: #333;
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+        
+        .header p {
+            color: #666;
+            font-size: 14px;
+        }
+        
+        .form-group {
+            margin-bottom: 25px;
+        }
+        
+        label {
+            display: block;
+            color: #333;
+            font-weight: 600;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+        
+        input[type="text"], select {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+        
+        input[type="text"]:focus, select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        select {
+            cursor: pointer;
+            background-color: white;
+        }
+        
+        button {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+        }
+        
+        button:active {
+            transform: translateY(0);
+        }
+        
+        button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        
+        .rerun-btn {
+            margin-top: 15px;
+            background: #007bff;
+            padding: 12px 24px;
+            border-radius: 6px;
+            color: white;
+            border: none;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.3s, transform 0.2s;
+        }
+        
+        .rerun-btn:hover {
+            background: #0056b3;
+            transform: translateY(-1px);
+        }
+        
+        .rerun-btn:disabled {
+            background: #6c757d;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .loader {
+            display: none;
+            text-align: center;
+            margin-top: 20px;
+        }
+        
+        .loader.active {
+            display: block;
+        }
+        
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 10px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .message {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 8px;
+            display: none;
+        }
+        
+        .message.active {
+            display: block;
+        }
+        
+        .message.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .message.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        
+        .stats {
+            display: flex;
+            justify-content: space-around;
+            margin: 15px 0;
+        }
+        
+        .stat-item {
+            text-align: center;
+        }
+        
+        .stat-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #667eea;
+        }
+        
+        .stat-label {
+            font-size: 12px;
+            color: #666;
+            margin-top: 5px;
+        }
+        
+        .download-link {
+            display: inline-block;
+            margin-top: 10px;
+            padding: 10px 20px;
+            background: #28a745;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            font-weight: 600;
+        }
+        
+        .download-link:hover {
+            background: #218838;
+        }
+        
+        .button-group {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: 15px;
+        }
+        
+        .view-report-btn {
+            padding: 10px 20px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 14px;
+        }
+        
+        .view-report-btn:hover {
+            background: #5568d3;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔍 Test Rigor Failure Reporter</h1>
+            <p>Generate comprehensive failure reports from your Test Rigor runs</p>
+        </div>
+        
+        <form id="reportForm">
+            <div class="form-group">
+                <label for="suite">Select the Suite</label>
+                <select id="suite" name="suite" required>
+                    <option value="">-- Select a Suite --</option>
+                    <option value="CoreHR-MasterSuite-STG">CoreHR-MasterSuite-STG</option>
+                    <option value="HRIS-CoreHR-QA">HRIS-CoreHR-QA</option>
+                    <option value="HRIS-US-CoreHR">HRIS-US-CoreHR</option>
+                    <option value="HRIS-US-CoreHR-QA">HRIS-US-CoreHR-QA</option>
+                    <option value="HRIS-US-PAY-QA">HRIS-US-PAY-QA</option>
+                    <option value="HRIS-US-PAY">HRIS-US-PAY</option>
+                    <option value="Payroll-QA">Payroll-QA</option>
+                    <option value="Payroll-MasterSuite-STG">Payroll-MasterSuite-STG</option>
+                    <option value="HRIS-US-TA-QA">HRIS-US-TA-QA</option>
+                    <option value="HRIS-US-TA">HRIS-US-TA</option>
+                    <option value="Time and Attendance-QA">Time and Attendance-QA</option>
+                    <option value="Time and Attendance-MasterSuite-STG">Time and Attendance-MasterSuite-STG</option>
+                    <option value="Benefits-QA">Benefits-QA</option>
+                    <option value="Benefits-MasterSuite-STG">Benefits-MasterSuite-STG</option>
+                    <option value="HRIS-US-BEN">HRIS-US-BEN</option>
+                    <option value="HRIS-US-BEN-QA">HRIS-US-BEN-QA</option>
+                    <option value="HRIS-US-SCHD-QA">HRIS-US-SCHD-QA</option>
+                    <option value="HRIS-US-SCHD">HRIS-US-SCHD</option>
+                    <option value="Schedule-QA">Schedule-QA</option>
+                    <option value="Schedule-MasterSuite-STG">Schedule-MasterSuite-STG</option>
+                    <option value="Neogov Common-QA">Neogov Common-QA</option>
+                    <option value="Neogov Common">Neogov Common</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="runId">Enter Run ID</label>
+                <input 
+                    type="text" 
+                    id="runId" 
+                    name="runId" 
+                    placeholder="Provide the Run ID from testRigor" 
+                    required
+                    autocomplete="off"
+                >
+            </div>
+            
+            <button type="submit" id="submitBtn" disabled>
+                Generate Report
+            </button>
+        </form>
+        
+        <div class="loader" id="loader">
+            <div class="spinner"></div>
+            <p>Generating report... Please wait</p>
+        </div>
+        
+        <div class="message" id="message"></div>
+    </div>
+    
+    <script>
+        const form = document.getElementById('reportForm');
+        const loader = document.getElementById('loader');
+        const message = document.getElementById('message');
+        const submitBtn = document.getElementById('submitBtn');
+        const suiteSelect = document.getElementById('suite');
+        const runIdInput = document.getElementById('runId');
+        let currentRunId = null;
+        let currentSuite = null;
+        
+        // Function to check if both fields are filled
+        function checkFormValidity() {
+            const suite = suiteSelect.value.trim();
+            const runId = runIdInput.value.trim();
+            
+            if (suite && runId) {
+                submitBtn.disabled = false;
+            } else {
+                submitBtn.disabled = true;
+            }
+        }
+        
+        // Add event listeners to both fields
+        suiteSelect.addEventListener('change', checkFormValidity);
+        runIdInput.addEventListener('input', checkFormValidity);
+        
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const suite = document.getElementById('suite').value.trim();
+            const runId = document.getElementById('runId').value.trim();
+            
+            if (!suite) {
+                showMessage('Please select a suite', 'error');
+                return;
+            }
+            
+            if (!runId) {
+                showMessage('Please enter a Run ID', 'error');
+                return;
+            }
+            
+            // Show loader
+            loader.classList.add('active');
+            message.classList.remove('active');
+            submitBtn.disabled = true;
+            
+            try {
+                const response = await fetch('/api/generate-report', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ 
+                        suite: suite,
+                        run_id: runId 
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok && data.success) {
+                    // Store current run info for rerun functionality
+                    currentRunId = runId;
+                    currentSuite = suite;
+                    
+                    // Store report data for View Report functionality
+                    window.currentReportData = data;
+                    
+                    const rerunButton = data.failed_tests > 0 
+                        ? `<button class="rerun-btn" onclick="rerunFailedTests()" id="rerunBtn">
+                            🔄 Rerun ${data.failed_tests} Failed Test(s)
+                           </button>`
+                        : '';
+                    
+                    showMessage(
+                        `<strong>Report Generated Successfully!</strong>
+                        <div class="stats">
+                            <div class="stat-item">
+                                <div class="stat-value">${data.total_tests}</div>
+                                <div class="stat-label">Total Tests</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-value">${data.failed_tests}</div>
+                                <div class="stat-label">Failed Tests</div>
+                            </div>
+                        </div>
+                        <div class="button-group">
+                            <button class="view-report-btn" onclick="viewReport()">
+                                📊 View Report
+                            </button>
+                            <a href="/api/download-report/${data.report_path}" class="download-link">
+                                📥 Download Excel
+                            </a>
+                        </div>
+                        ${rerunButton}`,
+                        'success'
+                    );
+                } else {
+                    showMessage(data.error || 'Failed to generate report', 'error');
+                }
+            } catch (error) {
+                showMessage('An error occurred: ' + error.message, 'error');
+            } finally {
+                loader.classList.remove('active');
+                submitBtn.disabled = false;
+            }
+        });
+        
+        async function rerunFailedTests() {
+            if (!currentRunId || !currentSuite) {
+                showMessage('No run ID or suite available. Please generate a report first.', 'error');
+                return;
+            }
+            
+            const rerunBtn = document.getElementById('rerunBtn');
+            if (rerunBtn) {
+                rerunBtn.disabled = true;
+                rerunBtn.textContent = '⏳ Triggering rerun...';
+            }
+            
+            try {
+                const response = await fetch('/api/rerun-failed', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ 
+                        suite: currentSuite,
+                        run_id: currentRunId,
+                        custom_name: `Rerun Failed - ${currentRunId} - ${new Date().toLocaleString()}`
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok && data.success) {
+                    showMessage(
+                        `<strong>✅ Rerun Triggered Successfully!</strong><br>
+                        <p style="margin-top: 10px;">Rerunning ${data.failed_tests_count} failed test case(s)</p>
+                        ${data.task_id ? `<p>Task ID: ${data.task_id}</p>` : ''}
+                        ${data.queue_id ? `<p>Queue ID: ${data.queue_id}</p>` : ''}
+                        <p style="margin-top: 10px; font-size: 12px; color: #666;">Check TestRigor dashboard for rerun progress</p>`,
+                        'success'
+                    );
+                } else {
+                    showMessage(`Failed to trigger rerun: ${data.error || 'Unknown error'}`, 'error');
+                    if (rerunBtn) {
+                        rerunBtn.disabled = false;
+                        rerunBtn.textContent = `🔄 Rerun Failed Tests`;
+                    }
+                }
+            } catch (error) {
+                showMessage('An error occurred: ' + error.message, 'error');
+                if (rerunBtn) {
+                    rerunBtn.disabled = false;
+                    rerunBtn.textContent = `🔄 Rerun Failed Tests`;
+                }
+            }
+        }
+        
+        function showMessage(text, type) {
+            message.innerHTML = text;
+            message.className = 'message active ' + type;
+        }
+        
+        function viewReport() {
+            if (window.currentReportData) {
+                const data = window.currentReportData;
+                const reportData = data.report_data;
+                
+                // Open new window
+                const reportWindow = window.open('', '_blank');
+                
+                // Build HTML for the new window
+                let html = `
+                <!DOCTYPE html>
+                <html lang="en">
+                <head>
+                    <meta charset="UTF-8">
+                    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                    <title>Test Rigor Failure Report - ${reportData.run_id}</title>
+                    <style>
+                        * {
+                            margin: 0;
+                            padding: 0;
+                            box-sizing: border-box;
+                        }
+                        
+                        body {
+                            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                            background: #f5f5f5;
+                            padding: 20px;
+                        }
+                        
+                        .report-container {
+                            max-width: 1400px;
+                            margin: 0 auto;
+                            background: white;
+                            border-radius: 10px;
+                            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+                            overflow: hidden;
+                        }
+                        
+                        .report-header {
+                            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                            color: white;
+                            padding: 30px;
+                            text-align: center;
+                        }
+                        
+                        .report-header h1 {
+                            font-size: 28px;
+                            margin-bottom: 10px;
+                        }
+                        
+                        .report-info {
+                            background: white;
+                            padding: 20px 30px;
+                            border-bottom: 2px solid #667eea;
+                        }
+                        
+                        .report-info-grid {
+                            display: grid;
+                            grid-template-columns: repeat(4, 1fr);
+                            gap: 20px;
+                            margin-bottom: 20px;
+                        }
+                        
+                        .report-info-item {
+                            display: flex;
+                            flex-direction: column;
+                        }
+                        
+                        .report-info-label {
+                            font-size: 12px;
+                            color: #666;
+                            font-weight: 600;
+                            margin-bottom: 5px;
+                        }
+                        
+                        .report-info-value {
+                            font-size: 14px;
+                            color: #333;
+                            font-weight: 500;
+                        }
+                        
+                        .stats {
+                            display: flex;
+                            justify-content: center;
+                            gap: 50px;
+                            padding: 20px;
+                            background: #f8f9fa;
+                        }
+                        
+                        .stat-item {
+                            text-align: center;
+                        }
+                        
+                        .stat-value {
+                            font-size: 32px;
+                            font-weight: bold;
+                            color: #667eea;
+                        }
+                        
+                        .stat-label {
+                            font-size: 14px;
+                            color: #666;
+                            margin-top: 5px;
+                        }
+                        
+                        .report-actions {
+                            text-align: center;
+                            padding: 20px;
+                            background: white;
+                            border-bottom: 1px solid #e0e0e0;
+                        }
+                        
+                        .download-btn {
+                            display: inline-block;
+                            padding: 12px 30px;
+                            background: #28a745;
+                            color: white;
+                            text-decoration: none;
+                            border-radius: 5px;
+                            font-weight: 600;
+                            font-size: 14px;
+                        }
+                        
+                        .download-btn:hover {
+                            background: #218838;
+                        }
+                        
+                        .table-container {
+                            overflow-x: auto;
+                            padding: 20px;
+                        }
+                        
+                        .report-table {
+                            width: 100%;
+                            border-collapse: collapse;
+                            background: white;
+                            table-layout: fixed;
+                        }
+                        
+                        .report-table th {
+                            background: #667eea;
+                            color: white;
+                            padding: 12px 8px;
+                            font-size: 13px;
+                            font-weight: 600;
+                            text-align: left;
+                            position: sticky;
+                            top: 0;
+                            z-index: 10;
+                        }
+                        
+                        .report-table th:nth-child(1) { width: 8%; }
+                        .report-table th:nth-child(2) { width: 18%; }
+                        .report-table th:nth-child(3) { width: 8%; }
+                        .report-table th:nth-child(4) { width: 8%; }
+                        .report-table th:nth-child(5) { width: 25%; }
+                        .report-table th:nth-child(6) { width: 23%; }
+                        .report-table th:nth-child(7) { width: 10%; }
+                        
+                        .report-table td {
+                            padding: 10px 8px;
+                            border-bottom: 1px solid #e0e0e0;
+                            font-size: 13px;
+                            color: #333;
+                            vertical-align: top;
+                            word-wrap: break-word;
+                            overflow-wrap: break-word;
+                        }
+                        
+                        .report-table tr:hover {
+                            background: #f5f5f5;
+                        }
+                        
+                        .failed-command {
+                            font-family: 'Courier New', monospace;
+                            font-size: 12px;
+                            white-space: pre-wrap;
+                        }
+                        
+                        .error-message {
+                            color: #d32f2f;
+                        }
+                        
+                        .status-failed {
+                            color: #d32f2f;
+                            font-weight: 600;
+                        }
+                        
+                        .screenshot-link {
+                            color: #667eea;
+                            text-decoration: none;
+                            font-size: 12px;
+                            display: block;
+                            margin-bottom: 3px;
+                        }
+                        
+                        .screenshot-link:hover {
+                            text-decoration: underline;
+                        }
+                    </style>
+                </head>
+                <body>
+                    <div class="report-container">
+                        <div class="report-header">
+                            <h1>🔍 Test Rigor Failure Report</h1>
+                        </div>
+                        
+                        <div class="report-info">
+                            <div class="report-info-grid">
+                                <div class="report-info-item">
+                                    <div class="report-info-label">Suite Name</div>
+                                    <div class="report-info-value">${reportData.suite_name}</div>
+                                </div>
+                                <div class="report-info-item">
+                                    <div class="report-info-label">Run ID</div>
+                                    <div class="report-info-value">${reportData.run_id}</div>
+                                </div>
+                                <div class="report-info-item">
+                                    <div class="report-info-label">Run Name</div>
+                                    <div class="report-info-value">${reportData.run_name}</div>
+                                </div>
+                                <div class="report-info-item">
+                                    <div class="report-info-label">Status</div>
+                                    <div class="report-info-value">${reportData.status}</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="stats">
+                            <div class="stat-item">
+                                <div class="stat-value">${data.total_tests}</div>
+                                <div class="stat-label">Total Tests</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-value">${data.failed_tests}</div>
+                                <div class="stat-label">Failed Tests</div>
+                            </div>
+                        </div>
+                        
+                        <div class="report-actions">
+                            <a href="/api/download-report/${data.report_path}" class="download-btn">
+                                📥 Download Excel Report
+                            </a>
+                        </div>
+                        
+                        <div class="table-container">
+                            <table class="report-table">
+                                <thead>
+                                    <tr>
+                                        <th>Test Case ID</th>
+                                        <th>Test Name</th>
+                                        <th>Status</th>
+                                        <th>Screenshot #</th>
+                                        <th>Failed Command</th>
+                                        <th>Error Message</th>
+                                        <th>Screenshots</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                `;
+                
+                // Add table rows
+                reportData.failures.forEach(failure => {
+                    html += `<tr>`;
+                    html += `<td>${failure.test_case_id}</td>`;
+                    html += `<td>${failure.test_name}</td>`;
+                    html += `<td class="status-failed">${failure.status}</td>`;
+                    html += `<td>${failure.screenshot_number}</td>`;
+                    html += `<td class="failed-command">${failure.failed_command}</td>`;
+                    html += `<td class="error-message">${failure.error_message}</td>`;
+                    html += `<td>`;
+                    if (failure.screenshot_urls && failure.screenshot_urls.length > 0) {
+                        failure.screenshot_urls.forEach((url, index) => {
+                            html += `<a href="${url}" target="_blank" class="screenshot-link">Screenshot ${index + 1}</a>`;
+                        });
+                    } else {
+                        html += 'N/A';
+                    }
+                    html += `</td>`;
+                    html += `</tr>`;
+                });
+                
+                html += `
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </body>
+                </html>
+                `;
+                
+                reportWindow.document.write(html);
+                reportWindow.document.close();
+            }
+        }
+    </script>
+</body>
+</html>
